@@ -12,7 +12,7 @@ import {
 import { colors } from '../theme/colors';
 import CampoTexto from '../components/CampoTexto';
 import BotaoGrande from '../components/BotaoGrande';
-import { cadastrarUsuario } from '../data/usuarios';
+import { cadastrarUsuarioApi } from '../services/authService';
 
 interface Props {
   navigation: any;
@@ -28,7 +28,7 @@ export default function CadastroScreen({ navigation }: Props) {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (!nome.trim() || !idade || !email.trim() || !senha) {
       Alert.alert('Ops!', 'Preencha todos os campos para continuar.');
       return;
@@ -43,14 +43,13 @@ export default function CadastroScreen({ navigation }: Props) {
     }
 
     setCarregando(true);
-    setTimeout(() => {
-      const resultado = cadastrarUsuario({
+    try {
+      const resultado = await cadastrarUsuarioApi({
         nome: nome.trim(),
         idade: idade!,
         email: email.trim(),
         senha,
       });
-      setCarregando(false);
 
       if (!resultado.ok) {
         Alert.alert('Não rolou 😕', resultado.erro || 'Erro ao cadastrar.');
@@ -60,9 +59,13 @@ export default function CadastroScreen({ navigation }: Props) {
       Alert.alert(
         '🎉 Conta criada!',
         `Bem-vindo(a) ao Matemágicos, ${nome}!`,
-        [{ text: 'Bora jogar!', onPress: () => navigation.navigate('Home') }]
+        [{ text: 'Bora jogar!', onPress: () => navigation.navigate('Home', { usuario: resultado.usuario }) }]
       );
-    }, 300);
+    } catch (erro: any) {
+      Alert.alert('Não rolou 😕', erro?.message || 'Erro ao cadastrar.');
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (

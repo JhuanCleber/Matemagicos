@@ -12,7 +12,7 @@ import {
 import { colors } from '../theme/colors';
 import CampoTexto from '../components/CampoTexto';
 import BotaoGrande from '../components/BotaoGrande';
-import { fazerLogin } from '../data/usuarios';
+import { fazerLoginApi } from '../services/authService';
 
 interface Props {
   navigation: any;
@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
 
     if (!email.trim() || !senha.trim()) {
       Alert.alert('Ops!', 'Preencha email e senha para continuar.');
@@ -32,18 +32,18 @@ export default function LoginScreen({ navigation }: Props) {
 
     setCarregando(true);
 
-    setTimeout(() => {
-      const resultado = fazerLogin(email.trim(), senha);
-      setCarregando(false);
-
+    try {
+      const resultado = await fazerLoginApi({ email: email.trim(), senha });
       if (!resultado.ok) {
-        Alert.alert('Não rolou 😕', resultado.erro);
+        Alert.alert('Não rolou 😕', resultado.erro || 'Erro ao fazer login.');
         return;
       }
-
-
-      navigation.navigate('Home');
-    }, 300);
+      navigation.navigate('Home', { usuario: resultado.usuario });
+    } catch (erro: any) {
+      Alert.alert('Não rolou 😕', erro?.message || 'Erro ao fazer login.');
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (

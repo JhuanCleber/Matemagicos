@@ -8,9 +8,11 @@ import {
   StatusBar,
 } from 'react-native';
 import { colors } from '../theme/colors';
+import { Usuario } from '../services/authService';
 
 interface Props {
   navigation: any;
+  route: any;
 }
 
 const JOGOS = [
@@ -58,7 +60,13 @@ const JOGOS = [
   },
 ];
 
-export default function HomeScreen({ navigation }: Props) {
+export default function HomeScreen({ navigation, route }: Props) {
+  // Vem do login/cadastro (veja LoginScreen e CadastroScreen). Se por algum
+  // motivo a tela for aberta sem esse parâmetro, cai num texto genérico
+  // em vez de quebrar o app.
+  const usuario: Usuario | undefined = route?.params?.usuario;
+  const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
@@ -66,7 +74,7 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={styles.header}>
         <View>
           <Text style={styles.saudacao}>
-            Olá, pequeno(a) matemágico(a)! 👋
+            Olá, {primeiroNome}! 👋
           </Text>
           <Text style={styles.nome}>Pronto para aprender?</Text>
         </View>
@@ -78,13 +86,16 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={styles.cardProgresso}>
         <View style={styles.progressoInfo}>
           <Text style={styles.progressoTitulo}>⭐ Sua jornada</Text>
-          <Text style={styles.progressoSubtitulo}>Nível 3 • 120 pontos</Text>
+          <Text style={styles.progressoSubtitulo}>
+            {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
+          </Text>
         </View>
-        <View style={styles.barraFundo}>
-          <View style={[styles.barraProgresso, { width: '60%' }]} />
-        </View>
+        {/* A barra de progresso e o sistema de "níveis" ainda não existem no
+            back-end — quando a lógica dos jogos for implementada, dá pra
+            calcular isso de verdade a partir de totalPontos. Por enquanto
+            fica só mostrando os pontos reais, sem inventar número de nível. */}
         <Text style={styles.progressoTexto}>
-          Faltam 80 pontos para o Nível 4! 🚀
+          Continue jogando pra ganhar mais estrelas! 🚀
         </Text>
       </View>
 

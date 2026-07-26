@@ -1,5 +1,8 @@
 # 🧙‍♂️ Matemágicos
 
+git add .
+git commit -m "Matemágicos"
+git push origin main
 App educativo de matemática para crianças de 5 a 10 anos, com jogos que estimulam o raciocínio lógico e o prazer pela matemática.
 
 ## ✨ Telas implementadas
@@ -28,7 +31,7 @@ Depois, escaneie o QR code com o app **Expo Go** (Android/iOS) ou aperte `a` par
 
 ## 📁 Estrutura de pastas
 
-```
+``
 Matemagicos/
 ├── App.js                       # Navegação entre as 3 telas
 ├── package.json
@@ -42,7 +45,7 @@ Matemagicos/
     │   └── HomeScreen.js
     └── theme/
         └── colors.js            # Paleta de cores do app
-```
+``
 
 ## 🎨 Paleta de cores
 
