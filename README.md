@@ -3,48 +3,59 @@
 git add .
 git commit -m "Matemágicos"
 git push origin main
+
 App educativo de matemática para crianças de 5 a 10 anos, com jogos que estimulam o raciocínio lógico e o prazer pela matemática.
+
+Este é o **front-end** (React Native + Expo). Ele se conecta a um back-end
+próprio em Spring Boot (autenticação com JWT, MySQL) — veja o repositório do
+back-end para instruções completas de configuração do banco e da API.
 
 ## ✨ Telas implementadas
 
-1. **Login** — entrada do usuário com email e senha, com link para cadastro.
-2. **Cadastro** — criação de conta com nome, idade (5–10), email, senha e confirmação.
-3. **Home (tela principal)** — lista de jogos matemáticos + card de progresso do aluno.
+1. **Login** — entrada do usuário com email e senha, com link para cadastro. Conectado à API (`POST /auth/login`).
+2. **Cadastro** — criação de conta com nome, idade (5–10), email, senha e confirmação. Conectado à API (`POST /auth/cadastro`).
+3. **Home (tela principal)** — lista de jogos matemáticos + card de progresso real do aluno (nome, pontos e moedas vindos do back-end).
 
 ## 🚀 Como rodar o projeto
 
 ```bash
-# 1. Instale o Expo CLI (caso não tenha)
-npm install -g expo-cli
-
-# 2. Entre na pasta do projeto
+# 1. Entre na pasta do projeto
 cd C:\Users\Kauan\Documents\Matemagicos
 
-# 3. Instale as dependências
+# 2. Instale as dependências
 npm install
 
-# 4. Inicie o projeto
+# 3. Inicie o projeto
 npx expo start
 ```
 
 Depois, escaneie o QR code com o app **Expo Go** (Android/iOS) ou aperte `a` para abrir no emulador Android, `i` para iOS, ou `w` para web.
 
+> ⚠️ O back-end (Spring Boot) precisa estar rodando para login/cadastro
+> funcionarem. Configure a URL dele em `src/config/api.ts` — o padrão já vem
+> ajustado para emulador Android (`10.0.2.2`).
+
 ## 📁 Estrutura de pastas
 
 ``
 Matemagicos/
-├── App.js                       # Navegação entre as 3 telas
+├── App.tsx                      # Navegação entre as telas
+├── index.ts                     # Ponto de entrada do Expo
 ├── package.json
 └── src/
     ├── components/
-    │   ├── BotaoGrande.js       # Botão grande e arredondado
-    │   └── CampoTexto.js        # Input com label
+    │   ├── BotaoGrande.tsx      # Botão grande e arredondado
+    │   └── CampoTexto.tsx       # Input com label (e opção de mostrar senha)
+    ├── config/
+    │   └── api.ts               # URL do back-end
+    ├── services/
+    │   └── authService.ts       # Chamadas à API (cadastro/login)
     ├── screens/
-    │   ├── LoginScreen.js
-    │   ├── CadastroScreen.js
-    │   └── HomeScreen.js
+    │   ├── LoginScreen.tsx
+    │   ├── CadastroScreen.tsx
+    │   └── HomeScreen.tsx
     └── theme/
-        └── colors.js            # Paleta de cores do app
+        └── colors.ts            # Paleta de cores do app
 ``
 
 ## 🎨 Paleta de cores
@@ -65,10 +76,13 @@ Matemagicos/
 5. 🔷 Formas Geométricas
 6. 🔢 Contando até 100
 
+> Por enquanto essa lista é só ilustrativa (dados fixos na tela) — a lógica de
+> cada jogo ainda não foi implementada.
+
 ## 🔮 Próximos passos
 
-- Persistir cadastro/login (AsyncStorage ou Firebase).
+- Persistir o usuário logado com **AsyncStorage** (hoje, ao fechar o app, sempre volta pro Login).
 - Implementar a lógica de cada jogo.
 - Adicionar sons e animações.
 - Ranking entre amigos.
-- Controle parental.
+- 📌 Se o app for publicado de verdade nas lojas: revisar o fluxo de cadastro para envolver um responsável/adulto (LGPD e políticas de apps infantis).
