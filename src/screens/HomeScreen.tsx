@@ -14,6 +14,9 @@ interface Props {
   navigation: any;
 }
 
+// O "id" aqui corresponde ao id_jogo criado pelo data.sql no back-end
+// (mesma ordem de inserção), e "tipoOperacao" usa os mesmos valores salvos
+// na coluna tipo_operacao da tabela jogo.
 const JOGOS = [
   {
     id: 1,
@@ -21,6 +24,7 @@ const JOGOS = [
     descricao: 'Some os números e ganhe estrelas!',
     icone: '➕',
     cor: colors.success,
+    tipoOperacao: 'soma',
   },
   {
     id: 2,
@@ -28,6 +32,7 @@ const JOGOS = [
     descricao: 'Explore o espaço subtraindo!',
     icone: '➖',
     cor: colors.secondary,
+    tipoOperacao: 'subtracao',
   },
   {
     id: 3,
@@ -35,6 +40,7 @@ const JOGOS = [
     descricao: 'Multiplique e vire um craque!',
     icone: '✖️',
     cor: colors.primary,
+    tipoOperacao: 'multiplicacao',
   },
   {
     id: 4,
@@ -42,6 +48,7 @@ const JOGOS = [
     descricao: 'Divida e vença os desafios!',
     icone: '➗',
     cor: colors.danger,
+    tipoOperacao: 'divisao',
   },
   {
     id: 5,
@@ -49,6 +56,7 @@ const JOGOS = [
     descricao: 'Aprenda as formas brincando!',
     icone: '🔷',
     cor: '#9B59B6',
+    tipoOperacao: 'geometria',
   },
   {
     id: 6,
@@ -56,11 +64,14 @@ const JOGOS = [
     descricao: 'Conte os objetos e ganhe pontos!',
     icone: '🔢',
     cor: '#3498DB',
+    tipoOperacao: 'contagem',
   },
 ];
 
 export default function HomeScreen({ navigation }: Props) {
-
+  // Vem do Context (preenchido no login/cadastro — veja UsuarioContext,
+  // LoginScreen e CadastroScreen). Se por algum motivo a tela for aberta
+  // sem ninguém logado, cai num texto genérico em vez de quebrar o app.
   const { usuario, deslogar } = useUsuario();
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
 
@@ -92,7 +103,10 @@ export default function HomeScreen({ navigation }: Props) {
             {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
           </Text>
         </View>
-        { }
+        {/* A barra de progresso e o sistema de "níveis" ainda não existem no
+            back-end — quando a lógica dos jogos for implementada, dá pra
+            calcular isso de verdade a partir de totalPontos. Por enquanto
+            fica só mostrando os pontos reais, sem inventar número de nível. */}
         <Text style={styles.progressoTexto}>
           Continue jogando pra ganhar mais estrelas! 🚀
         </Text>
@@ -110,6 +124,15 @@ export default function HomeScreen({ navigation }: Props) {
             key={jogo.id}
             style={[styles.jogoCard, { borderLeftColor: jogo.cor }]}
             activeOpacity={0.7}
+            onPress={() =>
+              navigation.navigate('Jogo', {
+                idJogo: jogo.id,
+                titulo: jogo.titulo,
+                tipoOperacao: jogo.tipoOperacao,
+                icone: jogo.icone,
+                cor: jogo.cor,
+              })
+            }
           >
             <View style={[styles.jogoIcone, { backgroundColor: jogo.cor }]}>
               <Text style={styles.jogoIconeTexto}>{jogo.icone}</Text>

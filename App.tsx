@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/LoginScreen';
 import CadastroScreen from './src/screens/CadastroScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import JogoScreen from './src/screens/JogoScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
 import { colors } from './src/theme/colors';
 
@@ -22,7 +23,9 @@ export default function App() {
 function AppNavigator() {
   const { carregando, estaLogado } = useUsuario();
 
-
+  // Enquanto checa se existe uma sessão salva no celular (AsyncStorage),
+  // mostra um loading simples em vez de "piscar" a tela de Login antes de
+  // decidir pra onde ir.
   if (carregando) {
     return (
       <View style={styles.telaCarregando}>
@@ -40,6 +43,7 @@ function AppNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Cadastro" component={CadastroScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Jogo" component={JogoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

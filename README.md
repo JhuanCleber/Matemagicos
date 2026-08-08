@@ -3,6 +3,8 @@
 git add .
 git commit -m "Matemágicos"
 git push origin main
+git pull origin main
+npx expo start
 
 App educativo de matemática para crianças de 5 a 10 anos, com jogos que estimulam o raciocínio lógico e o prazer pela matemática.
 
