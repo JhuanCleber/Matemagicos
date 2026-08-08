@@ -23,9 +23,7 @@ export default function App() {
 function AppNavigator() {
   const { carregando, estaLogado } = useUsuario();
 
-  // Enquanto checa se existe uma sessão salva no celular (AsyncStorage),
-  // mostra um loading simples em vez de "piscar" a tela de Login antes de
-  // decidir pra onde ir.
+
   if (carregando) {
     return (
       <View style={styles.telaCarregando}>

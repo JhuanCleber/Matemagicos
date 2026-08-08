@@ -14,9 +14,7 @@ interface Props {
   navigation: any;
 }
 
-// O "id" aqui corresponde ao id_jogo criado pelo data.sql no back-end
-// (mesma ordem de inserção), e "tipoOperacao" usa os mesmos valores salvos
-// na coluna tipo_operacao da tabela jogo.
+
 const JOGOS = [
   {
     id: 1,
@@ -69,9 +67,7 @@ const JOGOS = [
 ];
 
 export default function HomeScreen({ navigation }: Props) {
-  // Vem do Context (preenchido no login/cadastro — veja UsuarioContext,
-  // LoginScreen e CadastroScreen). Se por algum motivo a tela for aberta
-  // sem ninguém logado, cai num texto genérico em vez de quebrar o app.
+  
   const { usuario, deslogar } = useUsuario();
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
 
@@ -103,10 +99,7 @@ export default function HomeScreen({ navigation }: Props) {
             {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
           </Text>
         </View>
-        {/* A barra de progresso e o sistema de "níveis" ainda não existem no
-            back-end — quando a lógica dos jogos for implementada, dá pra
-            calcular isso de verdade a partir de totalPontos. Por enquanto
-            fica só mostrando os pontos reais, sem inventar número de nível. */}
+        {}
         <Text style={styles.progressoTexto}>
           Continue jogando pra ganhar mais estrelas! 🚀
         </Text>
