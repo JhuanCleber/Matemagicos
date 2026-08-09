@@ -3,15 +3,21 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
-import { gerarPerguntas, Pergunta } from '../game/perguntas';
+import { gerarPerguntas, Pergunta, Dificuldade } from '../game/perguntas';
 import { registrarDesempenhoApi, ResultadoDesempenho } from '../services/jogoService';
 
 const TOTAL_PERGUNTAS = 10;
+
+const LABEL_DIFICULDADE: Record<Dificuldade, string> = {
+  facil: 'Fácil',
+  medio: 'Médio',
+};
 
 interface JogoParams {
   idJogo: number;
   titulo: string;
   tipoOperacao: string;
+  dificuldade: Dificuldade;
   icone: string;
   cor: string;
 }
@@ -22,10 +28,12 @@ interface Props {
 }
 
 export default function JogoScreen({ navigation, route }: Props) {
-  const { idJogo, titulo, tipoOperacao, icone, cor } = route.params as JogoParams;
+  const { idJogo, titulo, tipoOperacao, dificuldade, icone, cor } = route.params as JogoParams;
   const { token, atualizarUsuario } = useUsuario();
 
-  const [perguntas] = useState<Pergunta[]>(() => gerarPerguntas(tipoOperacao, TOTAL_PERGUNTAS));
+  const [perguntas] = useState<Pergunta[]>(() =>
+    gerarPerguntas(tipoOperacao, TOTAL_PERGUNTAS, dificuldade)
+  );
   const [indiceAtual, setIndiceAtual] = useState(0);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState<string | null>(null);
   const [jaRespondeu, setJaRespondeu] = useState(false);
@@ -95,7 +103,7 @@ export default function JogoScreen({ navigation, route }: Props) {
 
   function handleJogarDeNovo() {
 
-    navigation.replace('Jogo', { idJogo, titulo, tipoOperacao, icone, cor });
+    navigation.replace('Jogo', { idJogo, titulo, tipoOperacao, dificuldade, icone, cor });
   }
 
   function estiloDaOpcao(opcao: string) {
@@ -159,7 +167,7 @@ export default function JogoScreen({ navigation, route }: Props) {
       </TouchableOpacity>
 
       <Text style={styles.progresso}>
-        {icone} {titulo} · Pergunta {indiceAtual + 1} de {perguntas.length}
+        {icone} {titulo} · {LABEL_DIFICULDADE[dificuldade]} · Pergunta {indiceAtual + 1} de {perguntas.length}
       </Text>
 
       <ScrollView contentContainerStyle={styles.scroll}>

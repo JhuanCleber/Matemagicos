@@ -3,7 +3,7 @@ import { API_URL, API_TIMEOUT_MS } from '../config/api';
 export interface DesempenhoPayload {
   idJogo: number;
   acertosPartida: number;
-  tempoGasto: number; // em segundos
+  tempoGasto: number;
 }
 
 export interface ResultadoDesempenho {

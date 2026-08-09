@@ -23,6 +23,7 @@ const JOGOS = [
     icone: '➕',
     cor: colors.success,
     tipoOperacao: 'soma',
+    dificuldade: 'facil' as const,
   },
   {
     id: 2,
@@ -31,6 +32,7 @@ const JOGOS = [
     icone: '➖',
     cor: colors.secondary,
     tipoOperacao: 'subtracao',
+    dificuldade: 'facil' as const,
   },
   {
     id: 3,
@@ -39,6 +41,7 @@ const JOGOS = [
     icone: '✖️',
     cor: colors.primary,
     tipoOperacao: 'multiplicacao',
+    dificuldade: 'medio' as const,
   },
   {
     id: 4,
@@ -47,6 +50,7 @@ const JOGOS = [
     icone: '➗',
     cor: colors.danger,
     tipoOperacao: 'divisao',
+    dificuldade: 'medio' as const,
   },
   {
     id: 5,
@@ -55,6 +59,7 @@ const JOGOS = [
     icone: '🔷',
     cor: '#9B59B6',
     tipoOperacao: 'geometria',
+    dificuldade: 'facil' as const,
   },
   {
     id: 6,
@@ -63,11 +68,12 @@ const JOGOS = [
     icone: '🔢',
     cor: '#3498DB',
     tipoOperacao: 'contagem',
+    dificuldade: 'facil' as const,
   },
 ];
 
 export default function HomeScreen({ navigation }: Props) {
-  
+
   const { usuario, deslogar } = useUsuario();
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
 
@@ -99,7 +105,7 @@ export default function HomeScreen({ navigation }: Props) {
             {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
           </Text>
         </View>
-        {}
+        { }
         <Text style={styles.progressoTexto}>
           Continue jogando pra ganhar mais estrelas! 🚀
         </Text>
@@ -122,6 +128,7 @@ export default function HomeScreen({ navigation }: Props) {
                 idJogo: jogo.id,
                 titulo: jogo.titulo,
                 tipoOperacao: jogo.tipoOperacao,
+                dificuldade: jogo.dificuldade,
                 icone: jogo.icone,
                 cor: jogo.cor,
               })
