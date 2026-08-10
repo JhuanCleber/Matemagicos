@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
+import { useAudioPlayer } from 'expo-audio';
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
@@ -31,6 +32,22 @@ export default function JogoScreen({ navigation, route }: Props) {
   const { idJogo, titulo, tipoOperacao, dificuldade, icone, cor } = route.params as JogoParams;
   const { token, atualizarUsuario } = useUsuario();
 
+  // Sons de feedback. O hook cuida de carregar e liberar o player sozinho
+  // quando a tela fecha — não precisa de cleanup manual.
+  const somAcerto = useAudioPlayer(require('../../assets/sounds/acerto.wav'));
+  const somErro = useAudioPlayer(require('../../assets/sounds/erro.wav'));
+  const somVitoria = useAudioPlayer(require('../../assets/sounds/vitoria.wav'));
+
+  function tocarSom(player: typeof somAcerto) {
+    try {
+      player.seekTo(0);
+      player.play();
+    } catch {
+      // Se o som falhar por algum motivo, o jogo continua normalmente —
+      // áudio é um "extra", nunca deve travar a experiência.
+    }
+  }
+
   const [perguntas] = useState<Pergunta[]>(() =>
     gerarPerguntas(tipoOperacao, TOTAL_PERGUNTAS, dificuldade)
   );
@@ -47,6 +64,47 @@ export default function JogoScreen({ navigation, route }: Props) {
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoDesempenho | null>(null);
 
+  // Animações: fade suave a cada pergunta nova, "sacudida" no erro, e um
+  // efeito de bounce no ícone da tela de resultado.
+  const opacidadeCard = useRef(new Animated.Value(0)).current;
+  const deslocamentoErro = useRef(new Animated.Value(0)).current;
+  const escalaResultado = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    opacidadeCard.setValue(0);
+    Animated.timing(opacidadeCard, {
+      toValue: 1,
+      duration: 280,
+      useNativeDriver: true,
+    }).start();
+  }, [indiceAtual]);
+
+  useEffect(() => {
+    if (jogoFinalizado) {
+      Animated.spring(escalaResultado, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }).start();
+
+      const foiBem = acertosRef.current >= perguntas.length * 0.7;
+      if (foiBem) {
+        tocarSom(somVitoria);
+      }
+    }
+  }, [jogoFinalizado]);
+
+  function tocarAnimacaoErro() {
+    deslocamentoErro.setValue(0);
+    Animated.sequence([
+      Animated.timing(deslocamentoErro, { toValue: 10, duration: 45, useNativeDriver: true }),
+      Animated.timing(deslocamentoErro, { toValue: -10, duration: 45, useNativeDriver: true }),
+      Animated.timing(deslocamentoErro, { toValue: 8, duration: 45, useNativeDriver: true }),
+      Animated.timing(deslocamentoErro, { toValue: -8, duration: 45, useNativeDriver: true }),
+      Animated.timing(deslocamentoErro, { toValue: 0, duration: 45, useNativeDriver: true }),
+    ]).start();
+  }
+
   const perguntaAtual = perguntas[indiceAtual];
 
   function handleResponder(opcao: string) {
@@ -56,6 +114,10 @@ export default function JogoScreen({ navigation, route }: Props) {
     if (opcao === perguntaAtual.respostaCorreta) {
       acertosRef.current += 1;
       setAcertos(acertosRef.current);
+      tocarSom(somAcerto);
+    } else {
+      tocarSom(somErro);
+      tocarAnimacaoErro();
     }
   }
 
@@ -121,7 +183,9 @@ export default function JogoScreen({ navigation, route }: Props) {
     return (
       <View style={[styles.container, { backgroundColor: cor }]}>
         <ScrollView contentContainerStyle={styles.resultadoScroll}>
-          <Text style={styles.resultadoIcone}>{foiBem ? '🎉' : '💪'}</Text>
+          <Animated.Text style={[styles.resultadoIcone, { transform: [{ scale: escalaResultado }] }]}>
+            {foiBem ? '🎉' : '💪'}
+          </Animated.Text>
           <Text style={styles.resultadoTitulo}>
             {foiBem ? 'Mandou muito bem!' : 'Quase lá!'}
           </Text>
@@ -171,7 +235,15 @@ export default function JogoScreen({ navigation, route }: Props) {
       </Text>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.card}>
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              opacity: opacidadeCard,
+              transform: [{ translateX: deslocamentoErro }],
+            },
+          ]}
+        >
           <Text style={styles.enunciado}>{perguntaAtual.enunciado}</Text>
 
           <View style={styles.opcoesContainer}>
@@ -196,7 +268,7 @@ export default function JogoScreen({ navigation, route }: Props) {
               cor={colors.primary}
             />
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
