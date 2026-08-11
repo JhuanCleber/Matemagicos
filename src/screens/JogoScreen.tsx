@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Animated } from 'react-native';
-import { useAudioPlayer } from 'expo-audio';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
@@ -13,6 +13,10 @@ const LABEL_DIFICULDADE: Record<Dificuldade, string> = {
   facil: 'Fácil',
   medio: 'Médio',
 };
+
+const SOM_ACERTO = require('../../assets/sounds/acerto.wav');
+const SOM_ERRO = require('../../assets/sounds/erro.wav');
+const SOM_VITORIA = require('../../assets/sounds/vitoria.wav');
 
 interface JogoParams {
   idJogo: number;
@@ -34,12 +38,64 @@ export default function JogoScreen({ navigation, route }: Props) {
 
   // Sons de feedback. O hook cuida de carregar e liberar o player sozinho
   // quando a tela fecha — não precisa de cleanup manual.
-  const somAcerto = useAudioPlayer(require('../../assets/sounds/acerto.wav'));
-  const somErro = useAudioPlayer(require('../../assets/sounds/erro.wav'));
-  const somVitoria = useAudioPlayer(require('../../assets/sounds/vitoria.wav'));
+  const somAcerto = useAudioPlayer(SOM_ACERTO);
+  const somErro = useAudioPlayer(SOM_ERRO);
+  const somVitoria = useAudioPlayer(SOM_VITORIA);
+
+  // "Aquece" cada player assim que ele confirma que terminou de carregar
+  // (isLoaded), tocando ele uma vez, bem baixinho, sem interromper — deixa
+  // terminar sozinho (os sons são curtos). A versão anterior que pausava
+  // no meio parece ter cortado o play antes do motor de áudio do celular
+  // "engatar" de verdade, e por isso a primeira resposta real continuava
+  // muda. `tocarSom()` sempre volta o volume pro máximo antes de tocar de
+  // verdade, então não importa se esse aquecimento ainda não terminou.
+  const statusAcerto = useAudioPlayerStatus(somAcerto);
+  const statusErro = useAudioPlayerStatus(somErro);
+  const statusVitoria = useAudioPlayerStatus(somVitoria);
+
+  const acertoAquecido = useRef(false);
+  const erroAquecido = useRef(false);
+  const vitoriaAquecida = useRef(false);
+
+  useEffect(() => {
+    if (statusAcerto.isLoaded && !acertoAquecido.current) {
+      acertoAquecido.current = true;
+      try {
+        somAcerto.volume = 0.01;
+        somAcerto.play();
+      } catch {
+        // Sem problema se falhar — o pior caso é a primeira resposta ficar muda.
+      }
+    }
+  }, [statusAcerto.isLoaded]);
+
+  useEffect(() => {
+    if (statusErro.isLoaded && !erroAquecido.current) {
+      erroAquecido.current = true;
+      try {
+        somErro.volume = 0.01;
+        somErro.play();
+      } catch {
+        // Idem.
+      }
+    }
+  }, [statusErro.isLoaded]);
+
+  useEffect(() => {
+    if (statusVitoria.isLoaded && !vitoriaAquecida.current) {
+      vitoriaAquecida.current = true;
+      try {
+        somVitoria.volume = 0.01;
+        somVitoria.play();
+      } catch {
+        // Idem.
+      }
+    }
+  }, [statusVitoria.isLoaded]);
 
   function tocarSom(player: typeof somAcerto) {
     try {
+      player.volume = 1;
       player.seekTo(0);
       player.play();
     } catch {
