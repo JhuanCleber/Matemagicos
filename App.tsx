@@ -9,6 +9,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import JogoScreen from './src/screens/JogoScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
 import { colors } from './src/theme/colors';
+import RankingScreen from './src/screens/RankingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,7 @@ function AppNavigator() {
         <Stack.Screen name="Cadastro" component={CadastroScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Jogo" component={JogoScreen} />
+        <Stack.Screen name="Ranking" component={RankingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

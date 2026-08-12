@@ -15,8 +15,7 @@ export interface RespostaRanking {
   suaPosicao?: RankingItem | null;
 }
 
-// Mesma estrutura de chamada usada em jogoService.ts — rota protegida,
-// então exige o token.
+
 export async function buscarRankingApi(token: string): Promise<RespostaRanking> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);

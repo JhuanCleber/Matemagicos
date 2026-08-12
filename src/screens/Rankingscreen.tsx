@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
-import { buscarRankingApi, RankingItem } from '../services/Rankingservice';
+import { buscarRankingApi, RankingItem } from '../services/rankingService';
 
 interface Props {
   navigation: any;
 }
 
-// Pódio com medalha pros 3 primeiros — o resto mostra só o número mesmo.
+
 function medalhaOuPosicao(posicao: number): string {
   if (posicao === 1) return '🥇';
   if (posicao === 2) return '🥈';

@@ -98,18 +98,21 @@ export default function HomeScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.cardProgresso}>
+      <TouchableOpacity
+        style={styles.cardProgresso}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Ranking')}
+      >
         <View style={styles.progressoInfo}>
           <Text style={styles.progressoTitulo}>⭐ Sua jornada</Text>
           <Text style={styles.progressoSubtitulo}>
             {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
           </Text>
         </View>
-        { }
         <Text style={styles.progressoTexto}>
-          Continue jogando pra ganhar mais estrelas! 🚀
+          🏆 Toque aqui pra ver o ranking!
         </Text>
-      </View>
+      </TouchableOpacity>
 
       <Text style={styles.secaoTitulo}>🎮 Escolha um jogo</Text>
 
