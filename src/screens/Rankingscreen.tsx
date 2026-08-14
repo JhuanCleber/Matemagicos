@@ -4,6 +4,7 @@ import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
 import { buscarRankingApi, RankingItem } from '../services/rankingService';
+import { useApiAutenticada } from '../hooks/useApiAutenticada';
 
 interface Props {
   navigation: any;
@@ -19,6 +20,7 @@ function medalhaOuPosicao(posicao: number): string {
 
 export default function RankingScreen({ navigation }: Props) {
   const { token } = useUsuario();
+  const { chamarApiAutenticada } = useApiAutenticada();
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function RankingScreen({ navigation }: Props) {
       if (!token) {
         throw new Error('Sessão expirada. Volte e faça login de novo.');
       }
-      const resposta = await buscarRankingApi(token);
+      const resposta = await chamarApiAutenticada((tokenAtual) => buscarRankingApi(tokenAtual));
       if (!resposta.ok) {
         throw new Error(resposta.erro || 'Não foi possível carregar o ranking.');
       }

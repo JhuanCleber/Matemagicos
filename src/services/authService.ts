@@ -17,6 +17,20 @@ export interface RespostaAuth {
   mensagem?: string;
   usuario?: Usuario;
   token?: string;
+  refreshToken?: string;
+}
+
+export interface RespostaRefresh {
+  ok: boolean;
+  erro?: string;
+  token?: string;
+  refreshToken?: string;
+}
+
+export interface RespostaSimples {
+  ok: boolean;
+  erro?: string;
+  mensagem?: string;
 }
 
 interface CadastroPayload {
@@ -88,4 +102,34 @@ export async function cadastrarUsuarioApi(payload: CadastroPayload): Promise<Res
 
 export async function fazerLoginApi(payload: LoginPayload): Promise<RespostaAuth> {
   return requisicao<RespostaAuth>('/auth/login', 'POST', payload);
+}
+
+// Troca um refresh token válido por um access token novo (+ refresh token rotacionado)
+export async function renovarTokenApi(refreshToken: string): Promise<RespostaRefresh> {
+  return requisicao<RespostaRefresh>('/auth/refresh', 'POST', { refreshToken });
+}
+
+// Revoga o refresh token no back-end. Não lançamos erro daqui pra fora — logout
+// deve sempre "funcionar" do ponto de vista do usuário, mesmo se a chamada falhar
+// (ex: sem internet na hora de sair). Quem chama decide se quer saber do resultado.
+export async function logoutApi(refreshToken: string): Promise<void> {
+  try {
+    await requisicao('/auth/logout', 'POST', { refreshToken });
+  } catch (erro) {
+    console.log('Não foi possível revogar a sessão no servidor:', erro);
+  }
+}
+
+// Pede o código de recuperação por email. Sempre volta "ok" mesmo se o email
+// não existir — o back-end não entrega essa informação de propósito.
+export async function esqueciSenhaApi(email: string): Promise<RespostaSimples> {
+  return requisicao<RespostaSimples>('/auth/esqueci-senha', 'POST', { email });
+}
+
+export async function redefinirSenhaApi(
+  email: string,
+  codigo: string,
+  novaSenha: string
+): Promise<RespostaSimples> {
+  return requisicao<RespostaSimples>('/auth/redefinir-senha', 'POST', { email, codigo, novaSenha });
 }

@@ -7,9 +7,11 @@ import LoginScreen from './src/screens/LoginScreen';
 import CadastroScreen from './src/screens/CadastroScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import JogoScreen from './src/screens/JogoScreen';
+import RankingScreen from './src/screens/RankingScreen';
+import EsqueciSenhaScreen from './src/screens/EsqueciSenhaScreen';
+import RedefinirSenhaScreen from './src/screens/RedefinirSenhaScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
 import { colors } from './src/theme/colors';
-import RankingScreen from './src/screens/RankingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +43,8 @@ function AppNavigator() {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Cadastro" component={CadastroScreen} />
+        <Stack.Screen name="EsqueciSenha" component={EsqueciSenhaScreen} />
+        <Stack.Screen name="RedefinirSenha" component={RedefinirSenhaScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Jogo" component={JogoScreen} />
         <Stack.Screen name="Ranking" component={RankingScreen} />

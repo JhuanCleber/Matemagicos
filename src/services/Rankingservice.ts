@@ -42,13 +42,21 @@ export async function buscarRankingApi(token: string): Promise<RespostaRanking> 
 
     if (!resposta.ok) {
       const mensagem = dados?.erro || `Falha na requisição (HTTP ${resposta.status})`;
-      throw new Error(mensagem);
+      const erro: any = new Error(mensagem);
+      // Marca o status no erro pra quem chamou (useApiAutenticada) saber que é
+      // um caso de "token expirado" e tentar renovar, em vez de só mostrar o erro
+      erro.status = resposta.status;
+      throw erro;
     }
 
     return dados as RespostaRanking;
   } catch (erro: any) {
     if (erro?.name === 'AbortError') {
       throw new Error('Tempo esgotado. Verifique sua conexão e se o servidor está rodando.');
+    }
+    // Se já tem "status", é um erro HTTP que montamos acima (mensagem já pronta) — repassa como está
+    if (erro?.status !== undefined) {
+      throw erro;
     }
     throw new Error(erro?.message || 'Não foi possível contatar o servidor.');
   } finally {

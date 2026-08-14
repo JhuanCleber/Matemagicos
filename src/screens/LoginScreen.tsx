@@ -36,11 +36,11 @@ export default function LoginScreen({ navigation }: Props) {
 
     try {
       const resultado = await fazerLoginApi({ email: email.trim(), senha });
-      if (!resultado.ok || !resultado.usuario || !resultado.token) {
+      if (!resultado.ok || !resultado.usuario || !resultado.token || !resultado.refreshToken) {
         Alert.alert('Não rolou 😕', resultado.erro || 'Erro ao fazer login.');
         return;
       }
-      await logar(resultado.usuario, resultado.token);
+      await logar(resultado.usuario, resultado.token, resultado.refreshToken);
       navigation.navigate('Home');
     } catch (erro: any) {
       Alert.alert('Não rolou 😕', erro?.message || 'Erro ao fazer login.');
@@ -89,7 +89,7 @@ export default function LoginScreen({ navigation }: Props) {
             mostrarBotaoSenha={true}
           />
 
-          <TouchableOpacity style={styles.esqueciSenha}>
+          <TouchableOpacity style={styles.esqueciSenha} onPress={() => navigation.navigate('EsqueciSenha')}>
             <Text style={styles.esqueciSenhaTexto}>Esqueci minha senha</Text>
           </TouchableOpacity>
 

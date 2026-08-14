@@ -53,12 +53,12 @@ export default function CadastroScreen({ navigation }: Props) {
         senha,
       });
 
-      if (!resultado.ok || !resultado.usuario || !resultado.token) {
+      if (!resultado.ok || !resultado.usuario || !resultado.token || !resultado.refreshToken) {
         Alert.alert('Não rolou 😕', resultado.erro || 'Erro ao cadastrar.');
         return;
       }
 
-      await logar(resultado.usuario, resultado.token);
+      await logar(resultado.usuario, resultado.token, resultado.refreshToken);
 
       Alert.alert(
         '🎉 Conta criada!',

@@ -6,6 +6,7 @@ import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
 import { gerarPerguntas, Pergunta, Dificuldade } from '../game/perguntas';
 import { registrarDesempenhoApi, ResultadoDesempenho } from '../services/jogoService';
+import { useApiAutenticada } from '../hooks/useApiAutenticada';
 
 const TOTAL_PERGUNTAS = 10;
 
@@ -35,6 +36,7 @@ interface Props {
 export default function JogoScreen({ navigation, route }: Props) {
   const { idJogo, titulo, tipoOperacao, dificuldade, icone, cor } = route.params as JogoParams;
   const { token, atualizarUsuario } = useUsuario();
+  const { chamarApiAutenticada } = useApiAutenticada();
 
   // Sons de feedback. O hook cuida de carregar e liberar o player sozinho
   // quando a tela fecha — não precisa de cleanup manual.
@@ -199,9 +201,11 @@ export default function JogoScreen({ navigation, route }: Props) {
       if (!token) {
         throw new Error('Sessão expirada. Volte e faça login de novo.');
       }
-      const resposta = await registrarDesempenhoApi(
-        { idJogo, acertosPartida: acertosRef.current, tempoGasto },
-        token
+      const resposta = await chamarApiAutenticada((tokenAtual) =>
+        registrarDesempenhoApi(
+          { idJogo, acertosPartida: acertosRef.current, tempoGasto },
+          tokenAtual
+        )
       );
       if (!resposta.ok || !resposta.resultado) {
         throw new Error(resposta.erro || 'Não foi possível salvar o resultado.');
