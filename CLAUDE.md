@@ -15,7 +15,6 @@ lojas), mantido por um único desenvolvedor (Kauan) que alterna entre um
 computador de casa e um do trabalho.
 
 **Dois repositórios separados no GitHub:**
-
 - **Back-end**: Spring Boot (pasta local costuma ser `Biblioteca`)
 - **Front-end**: React Native + Expo (pasta local costuma ser `Matemagicos`)
 
@@ -71,13 +70,11 @@ database/
 ```
 
 ### Regras de pontuação (em `DesempenhoJogoService`)
-
 - 10 pontos por acerto
 - 1 moeda mágica a cada 10 pontos
 - Constantes ajustáveis: `PONTOS_POR_ACERTO`, `PONTOS_POR_MOEDA`
 
 ### Autenticação
-
 - Login e cadastro retornam `{ usuario, token, refreshToken }`.
 - **Access token** (`token`): JWT, dura só 30min (`jwt.expiration-ms` em
   `application.properties`). É o que viaja em toda requisição autenticada.
@@ -131,14 +128,12 @@ src/
 ```
 
 ### Navegação (`App.tsx`)
-
 Stack: `Login → Cadastro/Home`. `Home → Jogo` (com params) e `Home → Ranking`.
 Tela inicial decidida dinamicamente: se já tem sessão salva no AsyncStorage
 (`estaLogado`), abre direto na `Home`; senão, `Login`. Enquanto checa,
 mostra um loading (`AppNavigator` em `App.tsx`).
 
 ### Context (`UsuarioContext.tsx`)
-
 Fonte única da verdade pro usuário logado — evita passar dados via
 `route.params` de tela em tela. Expõe: `usuario`, `token`, `estaLogado`,
 `carregando`, `logar()`, `deslogar()`, `atualizarUsuario()` (usado depois de
@@ -146,7 +141,6 @@ uma partida pra atualizar pontos/moedas sem precisar relogar). Persiste
 tudo no AsyncStorage (`@matemagicos:sessao`).
 
 ### `JogoScreen.tsx` — como funciona
-
 - Recebe via params: `idJogo`, `titulo`, `tipoOperacao`, `dificuldade`,
   `icone`, `cor` (definidos em `HomeScreen.tsx`, no array `JOGOS` — os
   `id` batem com a ordem de inserção do `data.sql` no back).
@@ -160,11 +154,9 @@ tudo no AsyncStorage (`@matemagicos:sessao`).
   precisar resetar cada state manualmente).
 
 ### `api.ts` — ⚠️ PRECISA SER AJUSTADO A CADA REDE NOVA
-
 ```ts
 export const API_URL = 'http://SEU_IP_AQUI:8080';
 ```
-
 - Emulador Android: `http://10.0.2.2:8080`
 - Web (`npx expo start` → `w`): `http://localhost:8080`
 - Celular físico: IP real do computador na rede (`ipconfig` no Windows) — **muda toda vez que troca de rede/computador**. Isso já causou bugs reais (erro "Tempo esgotado") mais de uma vez.
@@ -195,6 +187,7 @@ Nada disso é versionado no Git (por design — são segredos/config local):
 - **Som mudo na primeira resposta** (`expo-audio`): o player precisa de um "aquecimento" real — tocar o som uma vez (baixinho, `volume = 0.01`, sem pausar no meio) assim que `useAudioPlayerStatus(...).isLoaded` vira `true`. Interromper com `pause()` cedo demais NÃO resolve. `preloadAudioSource` não existe na versão instalada (1.1.1) — não usar.
 - **Firewall do Windows**: pode bloquear o celular físico de acessar a API mesmo com tudo configurado certo. Testar primeiro pelo navegador do PC usando o IP (não `localhost`) pra isolar o problema.
 - **MySQL com senha diferente por computador**: é normal e esperado — cada `DB_PASSWORD` é local.
+- **`Could not resolve placeholder 'MAIL_USERNAME'` ao rodar `.\mvnw.cmd clean install`**: variável de ambiente criada mas o terminal/VSCode ainda não foi reaberto (variáveis novas só valem pra processos abertos depois da criação). Fechar TODAS as janelas do VSCode, reabrir, conferir com `echo $env:MAIL_USERNAME` no PowerShell. Dica: no dia a dia, `.\mvnw.cmd spring-boot:run` sobe o back sem rodar os testes (mais rápido que `clean install`).
 
 ---
 
