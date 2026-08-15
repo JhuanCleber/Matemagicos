@@ -15,6 +15,7 @@ lojas), mantido por um único desenvolvedor (Kauan) que alterna entre um
 computador de casa e um do trabalho.
 
 **Dois repositórios separados no GitHub:**
+
 - **Back-end**: Spring Boot (pasta local costuma ser `Biblioteca`)
 - **Front-end**: React Native + Expo (pasta local costuma ser `Matemagicos`)
 
@@ -70,11 +71,13 @@ database/
 ```
 
 ### Regras de pontuação (em `DesempenhoJogoService`)
+
 - 10 pontos por acerto
 - 1 moeda mágica a cada 10 pontos
 - Constantes ajustáveis: `PONTOS_POR_ACERTO`, `PONTOS_POR_MOEDA`
 
 ### Autenticação
+
 - Login e cadastro retornam `{ usuario, token, refreshToken }`.
 - **Access token** (`token`): JWT, dura só 30min (`jwt.expiration-ms` em
   `application.properties`). É o que viaja em toda requisição autenticada.
@@ -100,6 +103,29 @@ database/
   senha, e revoga **todas** as sessões ativas do usuário (`refresh_tokens`) por
   segurança — se a senha mudou, ninguém deveria continuar logado em outro
   aparelho com a sessão antiga.
+- **Verificação de email**: cadastro já dispara um código de 6 dígitos
+  automaticamente (tabela `email_verification_tokens`, válido 24h, uso único),
+  mas **não bloqueia o login** — o usuário entra normal e só vê um aviso
+  discreto na Home (`usuario.emailVerificado === false`) até confirmar. Rotas:
+  `POST /auth/verificar-email` (email + código) e `POST /auth/reenviar-verificacao`
+  (só email, reaproveita o `EsqueciSenhaRequestDTO` já que o formato é igual).
+  Envio de email nunca quebra o cadastro (try/catch silencioso) — se o servidor
+  de email falhar, o usuário só reenvia depois.
+- **Rate limiting**: `RateLimitFilter` (janela fixa, em memória, por IP + rota)
+  protege as rotas de `/auth/**` contra spam/força bruta — ex: só 5 tentativas
+  de login por minuto, 3 pedidos de "esqueci senha" por 15min. Reseta quando o
+  back reinicia. Devolve 429 com `{ok:false, erro:"Muitas tentativas..."}`
+  quando estoura o limite. **Isso pode atrapalhar testes manuais repetidos no
+  Postman** — se aparecer 429 testando, é o limite, não bug; espere a janela
+  passar ou reinicie o back.
+- **Filtro de nome** (`FiltroDeNomeService`): protege o ranking público contra
+  nomes impróprios. Duas camadas, aplicadas hoje só no cadastro: (1) `@Pattern`
+  no `CadastroRequestDTO` só aceita letras/espaço/hífen/apóstrofo (barra número,
+  símbolo, emoji); (2) `contemPalavraProibida()` normaliza o texto (sem acento,
+  minúsculo, tenta desfazer espaçamento e leetspeak básico tipo "p0rra") e
+  compara com uma lista de termos ofensivos em português. Não é moderação de
+  conteúdo completa, só uma primeira barreira. Se um dia existir edição de
+  perfil (nome), reaproveitar esse mesmo `FiltroDeNomeService` lá.
 
 ---
 
@@ -128,12 +154,14 @@ src/
 ```
 
 ### Navegação (`App.tsx`)
+
 Stack: `Login → Cadastro/Home`. `Home → Jogo` (com params) e `Home → Ranking`.
 Tela inicial decidida dinamicamente: se já tem sessão salva no AsyncStorage
 (`estaLogado`), abre direto na `Home`; senão, `Login`. Enquanto checa,
 mostra um loading (`AppNavigator` em `App.tsx`).
 
 ### Context (`UsuarioContext.tsx`)
+
 Fonte única da verdade pro usuário logado — evita passar dados via
 `route.params` de tela em tela. Expõe: `usuario`, `token`, `estaLogado`,
 `carregando`, `logar()`, `deslogar()`, `atualizarUsuario()` (usado depois de
@@ -141,6 +169,7 @@ uma partida pra atualizar pontos/moedas sem precisar relogar). Persiste
 tudo no AsyncStorage (`@matemagicos:sessao`).
 
 ### `JogoScreen.tsx` — como funciona
+
 - Recebe via params: `idJogo`, `titulo`, `tipoOperacao`, `dificuldade`,
   `icone`, `cor` (definidos em `HomeScreen.tsx`, no array `JOGOS` — os
   `id` batem com a ordem de inserção do `data.sql` no back).
@@ -154,9 +183,11 @@ tudo no AsyncStorage (`@matemagicos:sessao`).
   precisar resetar cada state manualmente).
 
 ### `api.ts` — ⚠️ PRECISA SER AJUSTADO A CADA REDE NOVA
+
 ```ts
 export const API_URL = 'http://SEU_IP_AQUI:8080';
 ```
+
 - Emulador Android: `http://10.0.2.2:8080`
 - Web (`npx expo start` → `w`): `http://localhost:8080`
 - Celular físico: IP real do computador na rede (`ipconfig` no Windows) — **muda toda vez que troca de rede/computador**. Isso já causou bugs reais (erro "Tempo esgotado") mais de uma vez.
@@ -214,7 +245,8 @@ Nada disso é versionado no Git (por design — são segredos/config local):
 1. **Se um arquivo sumir do ambiente da IA** (acontece por limpeza automática entre sessões/mensagens), **pedir pro usuário reenviar antes de editar** — nunca reconstruir de memória sem avisar.
 2. **Qualquer mudança que envolva o Postman**: sempre entregar a coleção `.json` **completa e atualizada**, pronta pra importar — nunca pedir pra adicionar campo/requisição manualmente.
 3. **Qualquer mudança que envolva o banco de dados**: sempre entregar o `01_create_database.sql` **completo e atualizado** (com `IF NOT EXISTS`, nunca apagando dados existentes), pronto pra rodar no MySQL Workbench — nunca pedir pra criar tabela/coluna manualmente.
-4. O usuário tem pouca experiência prévia com o ecossistema (Maven, Git, variáveis de ambiente) — explicações passo a passo, sem pular etapas, funcionam melhor que respostas condensadas.
+4. **Qualquer mudança que exija algo fora do editor** (variável de ambiente, conta externa tipo Gmail, configuração do sistema): sempre avisar explicitamente o que precisa ser feito, e separar claramente o que é "faça uma vez só, vale pra sempre" (ex: gerar uma senha de app) do que é "precisa repetir em cada computador" (ex: criar a variável de ambiente local) — o usuário alterna entre dois computadores.
+5. O usuário tem pouca experiência prévia com o ecossistema (Maven, Git, variáveis de ambiente) — explicações passo a passo, sem pular etapas, funcionam melhor que respostas condensadas.
 
 ---
 

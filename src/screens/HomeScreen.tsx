@@ -98,6 +98,18 @@ export default function HomeScreen({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
+      {usuario?.emailVerificado === false && (
+        <TouchableOpacity
+          style={styles.avisoEmail}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('VerificarEmail')}
+        >
+          <Text style={styles.avisoEmailTexto}>
+            📩 Confirme seu email — toque aqui
+          </Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity
         style={styles.cardProgresso}
         activeOpacity={0.8}
@@ -197,6 +209,21 @@ const styles = StyleSheet.create({
   },
   avatarTexto: {
     fontSize: 30,
+  },
+  avisoEmail: {
+    backgroundColor: colors.warning,
+    marginHorizontal: 24,
+    marginTop: -12,
+    marginBottom: 12,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  avisoEmailTexto: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   cardProgresso: {
     backgroundColor: colors.card,

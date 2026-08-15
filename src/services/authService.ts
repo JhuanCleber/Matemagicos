@@ -9,6 +9,7 @@ export interface Usuario {
   nivelEscolar?: number;
   totalPontos?: number;
   moedasMagicas?: number;
+  emailVerificado?: boolean;
 }
 
 export interface RespostaAuth {
@@ -132,4 +133,12 @@ export async function redefinirSenhaApi(
   novaSenha: string
 ): Promise<RespostaSimples> {
   return requisicao<RespostaSimples>('/auth/redefinir-senha', 'POST', { email, codigo, novaSenha });
+}
+
+export async function verificarEmailApi(email: string, codigo: string): Promise<RespostaSimples> {
+  return requisicao<RespostaSimples>('/auth/verificar-email', 'POST', { email, codigo });
+}
+
+export async function reenviarVerificacaoApi(email: string): Promise<RespostaSimples> {
+  return requisicao<RespostaSimples>('/auth/reenviar-verificacao', 'POST', { email });
 }

@@ -10,6 +10,7 @@ import JogoScreen from './src/screens/JogoScreen';
 import RankingScreen from './src/screens/RankingScreen';
 import EsqueciSenhaScreen from './src/screens/EsqueciSenhaScreen';
 import RedefinirSenhaScreen from './src/screens/RedefinirSenhaScreen';
+import VerificarEmailScreen from './src/screens/VerificarEmailScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
 import { colors } from './src/theme/colors';
 
@@ -46,6 +47,7 @@ function AppNavigator() {
         <Stack.Screen name="EsqueciSenha" component={EsqueciSenhaScreen} />
         <Stack.Screen name="RedefinirSenha" component={RedefinirSenhaScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="VerificarEmail" component={VerificarEmailScreen} />
         <Stack.Screen name="Jogo" component={JogoScreen} />
         <Stack.Screen name="Ranking" component={RankingScreen} />
       </Stack.Navigator>
