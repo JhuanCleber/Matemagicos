@@ -1,43 +1,29 @@
 import { API_URL, API_TIMEOUT_MS } from '../config/api';
+import { Usuario } from './authService';
 
-export interface DesempenhoPayload {
-  idJogo: number;
-  acertosPartida: number;
-  tempoGasto: number;
-}
-
-export interface ResultadoDesempenho {
-  idDesempenho: number;
-  acertosPartida: number;
-  tempoGasto: number;
-  pontosGanhos: number;
-  totalPontosAtualizado: number;
-  moedasMagicasAtualizado: number;
-}
-
-export interface RespostaDesempenho {
+export interface RespostaEditarPerfil {
   ok: boolean;
   erro?: string;
   mensagem?: string;
-  resultado?: ResultadoDesempenho;
+  usuario?: Usuario;
 }
 
-
-export async function registrarDesempenhoApi(
-  payload: DesempenhoPayload,
+export async function editarPerfilApi(
+  nome: string,
+  idade: number,
   token: string
-): Promise<RespostaDesempenho> {
+): Promise<RespostaEditarPerfil> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
-    const resposta = await fetch(`${API_URL}/desempenho`, {
-      method: 'POST',
+    const resposta = await fetch(`${API_URL}/usuarios/perfil`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ nome, idade }),
       signal: controller.signal,
     });
 
@@ -52,7 +38,15 @@ export async function registrarDesempenhoApi(
     }
 
     if (!resposta.ok) {
-      const mensagem = dados?.erro || `Falha na requisição (HTTP ${resposta.status})`;
+      let mensagem = dados?.erro || `Falha na requisição (HTTP ${resposta.status})`;
+
+      if (dados?.campos && typeof dados.campos === 'object') {
+        const mensagensDosCampos = Object.values(dados.campos) as string[];
+        if (mensagensDosCampos.length > 0) {
+          mensagem = mensagensDosCampos.join('\n');
+        }
+      }
+
       const erro: any = new Error(mensagem);
       // Marca o status no erro pra quem chamou (useApiAutenticada) saber que é
       // um caso de "token expirado" e tentar renovar, em vez de só mostrar o erro
@@ -60,11 +54,8 @@ export async function registrarDesempenhoApi(
       throw erro;
     }
 
-    return dados as RespostaDesempenho;
+    return dados as RespostaEditarPerfil;
   } catch (erro: any) {
-    // Erro HTTP normal (já tem status) — não é falha de conexão, repassa como está.
-    // IMPORTANTE: essa chamada especificamente (salvar resultado de partida) nunca
-    // deve ser repetida automaticamente — ver aviso em utils/fetchComRetry.ts
     if (erro?.status !== undefined) {
       throw erro;
     }

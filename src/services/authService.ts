@@ -83,15 +83,30 @@ async function requisicao<T>(caminho: string, metodo: string, corpo?: unknown): 
         }
       }
 
-      throw new Error(mensagem);
+      // Erro "normal" da API (validação, credenciais erradas, 429 etc.) — tem status,
+      // não é falha de conexão, então não deve ser tratado nem repetido como tal
+      const erroHttp: any = new Error(mensagem);
+      erroHttp.status = resposta.status;
+      throw erroHttp;
     }
 
     return dados as T;
   } catch (erro: any) {
-    if (erro?.name === 'AbortError') {
-      throw new Error('Tempo esgotado. Verifique sua conexão e se o servidor está rodando.');
+    // Erro HTTP normal (já formatado acima) — repassa como está
+    if (erro?.status !== undefined) {
+      throw erro;
     }
-    throw new Error(erro?.message || 'Não foi possível contatar o servidor.');
+
+    // A partir daqui, é falha de conexão de verdade (não chegou resposta do servidor)
+    if (erro?.name === 'AbortError') {
+      const e: any = new Error('O servidor demorou pra responder. Verifique sua conexão.');
+      e.semConexao = true;
+      throw e;
+    }
+
+    const e: any = new Error('Sem conexão com a internet. Verifique o Wi-Fi ou os dados móveis e tente de novo.');
+    e.semConexao = true;
+    throw e;
   } finally {
     clearTimeout(timeout);
   }

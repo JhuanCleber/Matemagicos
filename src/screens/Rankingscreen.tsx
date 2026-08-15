@@ -5,6 +5,7 @@ import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
 import { buscarRankingApi, RankingItem } from '../services/rankingService';
 import { useApiAutenticada } from '../hooks/useApiAutenticada';
+import { comRetry } from '../utils/fetchComRetry';
 
 interface Props {
   navigation: any;
@@ -38,7 +39,9 @@ export default function RankingScreen({ navigation }: Props) {
       if (!token) {
         throw new Error('Sessão expirada. Volte e faça login de novo.');
       }
-      const resposta = await chamarApiAutenticada((tokenAtual) => buscarRankingApi(tokenAtual));
+      const resposta = await comRetry(() =>
+        chamarApiAutenticada((tokenAtual) => buscarRankingApi(tokenAtual))
+      );
       if (!resposta.ok) {
         throw new Error(resposta.erro || 'Não foi possível carregar o ranking.');
       }

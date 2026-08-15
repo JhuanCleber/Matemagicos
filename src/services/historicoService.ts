@@ -1,43 +1,33 @@
 import { API_URL, API_TIMEOUT_MS } from '../config/api';
 
-export interface DesempenhoPayload {
-  idJogo: number;
-  acertosPartida: number;
-  tempoGasto: number;
-}
-
-export interface ResultadoDesempenho {
+export interface HistoricoItem {
   idDesempenho: number;
+  idJogo: number;
+  nomeFase: string;
+  tipoOperacao: string;
   acertosPartida: number;
   tempoGasto: number;
   pontosGanhos: number;
-  totalPontosAtualizado: number;
-  moedasMagicasAtualizado: number;
+  dataHora: string;
 }
 
-export interface RespostaDesempenho {
+export interface RespostaHistorico {
   ok: boolean;
   erro?: string;
-  mensagem?: string;
-  resultado?: ResultadoDesempenho;
+  historico?: HistoricoItem[];
 }
 
-
-export async function registrarDesempenhoApi(
-  payload: DesempenhoPayload,
-  token: string
-): Promise<RespostaDesempenho> {
+export async function buscarHistoricoApi(token: string): Promise<RespostaHistorico> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
-    const resposta = await fetch(`${API_URL}/desempenho`, {
-      method: 'POST',
+    const resposta = await fetch(`${API_URL}/desempenho/historico`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
@@ -60,15 +50,15 @@ export async function registrarDesempenhoApi(
       throw erro;
     }
 
-    return dados as RespostaDesempenho;
+    return dados as RespostaHistorico;
   } catch (erro: any) {
-    // Erro HTTP normal (já tem status) — não é falha de conexão, repassa como está.
-    // IMPORTANTE: essa chamada especificamente (salvar resultado de partida) nunca
-    // deve ser repetida automaticamente — ver aviso em utils/fetchComRetry.ts
+    // Erro HTTP normal (já tem status) — não é falha de conexão, repassa como está
     if (erro?.status !== undefined) {
       throw erro;
     }
 
+    // Falha de conexão de verdade — essa chamada é segura de repetir automaticamente
+    // (é só leitura), por isso marcamos semConexao
     if (erro?.name === 'AbortError') {
       const e: any = new Error('O servidor demorou pra responder. Verifique sua conexão.');
       e.semConexao = true;

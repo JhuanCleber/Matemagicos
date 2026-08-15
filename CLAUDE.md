@@ -27,7 +27,8 @@ computador de casa e um do trabalho.
 (Hibernate), MySQL 8, Maven, JWT (`jjwt` 0.12.6).
 
 **Front-end:** React Native + Expo SDK ~54, TypeScript, React Navigation
-(native-stack), `expo-audio`, `@react-native-async-storage/async-storage`.
+(native-stack), `expo-audio`, `@react-native-async-storage/async-storage`,
+`@react-native-community/netinfo` (detecção de conexão com a internet).
 
 ---
 
@@ -112,12 +113,21 @@ database/
   Envio de email nunca quebra o cadastro (try/catch silencioso) — se o servidor
   de email falhar, o usuário só reenvia depois.
 - **Rate limiting**: `RateLimitFilter` (janela fixa, em memória, por IP + rota)
-  protege as rotas de `/auth/**` contra spam/força bruta — ex: só 5 tentativas
-  de login por minuto, 3 pedidos de "esqueci senha" por 15min. Reseta quando o
-  back reinicia. Devolve 429 com `{ok:false, erro:"Muitas tentativas..."}`
-  quando estoura o limite. **Isso pode atrapalhar testes manuais repetidos no
-  Postman** — se aparecer 429 testando, é o limite, não bug; espere a janela
-  passar ou reinicie o back.
+  protege as rotas de `/auth/**` contra spam/força bruta — ex: só 8 tentativas
+  erradas de login por minuto, 3 pedidos de "esqueci senha" por 15min. Reseta
+  quando o back reinicia. Devolve 429 com `{ok:false, erro:"Muitas
+  tentativas..."}` quando estoura o limite. **Isso pode atrapalhar testes
+  manuais repetidos no Postman** — se aparecer 429 testando, é o limite, não
+  bug; espere a janela passar ou reinicie o back. Login/redefinir-senha/
+  verificar-email só contam ERROS pro limite (`contarSoFalhas`) — um acerto
+  zera o contador na hora. **Importante entender**: uma vez que o limite já
+  estourou, a PRÓXIMA tentativa fica bloqueada mesmo que seja a senha certa,
+  até a janela passar — isso é intencional (é assim que rate limiting protege
+  contra força bruta de verdade em qualquer sistema sério; se um acerto sempre
+  pudesse "furar" o bloqueio, o limite não protegeria nada). Não é bug pra
+  "consertar" de novo — se a criança estiver travando demais no dia a dia, a
+  solução certa é aumentar os números em `RateLimitFilter`, não tentar deixar
+  acerto ignorar bloqueio já ativo.
 - **Filtro de nome** (`FiltroDeNomeService`): protege o ranking público contra
   nomes impróprios. Duas camadas, aplicadas hoje só no cadastro: (1) `@Pattern`
   no `CadastroRequestDTO` só aceita letras/espaço/hífen/apóstrofo (barra número,
@@ -126,6 +136,19 @@ database/
   compara com uma lista de termos ofensivos em português. Não é moderação de
   conteúdo completa, só uma primeira barreira. Se um dia existir edição de
   perfil (nome), reaproveitar esse mesmo `FiltroDeNomeService` lá.
+- **Tratamento de sem internet** (front): `useConectividade()` (usa
+  `@react-native-community/netinfo`) alimenta um banner flutuante global em
+  `App.tsx` que aparece em qualquer tela quando o celular perde conexão — não
+  precisa mexer tela por tela. Erros de rede de verdade (não erros de negócio
+  tipo senha errada) vêm marcados com `erro.semConexao = true` nos services
+  (`authService`, `jogoService`, `rankingService`). `utils/fetchComRetry.ts`
+  (`comRetry`) repete automaticamente só chamadas de LEITURA marcadas assim
+  (ex: buscar ranking) — **nunca** envolver uma ação que cria dado no servidor
+  (tipo registrar desempenho de uma partida) nisso, pra não arriscar duplicar
+  em caso da resposta se perder depois do servidor já ter processado; essas
+  mantêm botão de "tentar de novo" manual. `useApiAutenticada` também foi
+  ajustado pra não deslogar o usuário se a renovação de token falhar só por
+  falta de conexão (antes deslogava por engano nesse caso).
 
 ---
 
@@ -182,7 +205,58 @@ tudo no AsyncStorage (`@matemagicos:sessao`).
 - "Jogar de novo" usa `navigation.replace()` (recarrega a tela do zero, sem
   precisar resetar cada state manualmente).
 
-### `api.ts` — ⚠️ PRECISA SER AJUSTADO A CADA REDE NOVA
+### `PerfilScreen.tsx`
+
+Acessada tocando no avatar da Home. Mostra nome, email (com o mesmo aviso de
+"confirme seu email" da Home se `emailVerificado === false`), idade, nível
+escolar (se preenchido), total de pontos e moedas mágicas, link pro ranking,
+link pro histórico de partidas, e botão de sair. Não faz nenhuma chamada nova
+ao back-end pros dados do próprio usuário — usa só o `usuario` que já vem do
+`UsuarioContext` (login/cadastro/refresh já trazem tudo isso).
+
+### `HistoricoScreen.tsx` / `GET /desempenho/historico`
+
+Últimas 50 partidas do usuário, mais recente primeiro. Os pontos ganhos por
+partida **não ficam salvos direto na tabela `desempenho_jogo`** — só em
+`pontuacao_historico`, sem vínculo por id com a partida específica — por isso
+o back recalcula com a mesma constante `PONTOS_POR_ACERTO` usada em
+`registrar()` (`DesempenhoJogoService`), em vez de duplicar o número em outro
+lugar. Se um dia `PONTOS_POR_ACERTO` mudar de valor, partidas antigas exibidas
+vão refletir o valor novo (pequena imprecisão histórica aceitável pro estágio
+atual do projeto — se isso incomodar no futuro, o jeito certo é passar a
+salvar `pontosGanhos` direto em `DesempenhoJogo` na hora de registrar).
+
+### `EvolucaoScreen.tsx`
+
+Dois gráficos simples, construídos com `View`s puros (sem SVG nem biblioteca
+de gráfico — nenhuma dependência nova) — pontos por dia (últimos 7 dias com
+atividade) e percentual de acerto por tipo de jogo. **Não usa endpoint novo**:
+reaproveita `GET /desempenho/historico` (o mesmo do `HistoricoScreen`) e faz
+toda a agregação no front. O percentual de acerto assume 10 perguntas por
+partida (`PERGUNTAS_POR_PARTIDA`, mesmo valor de `TOTAL_PERGUNTAS` em
+`JogoScreen.tsx`) — se esse número mudar um dia, ajustar aqui também. Ícone,
+cor e nome amigável por tipo de operação ficam em `theme/jogosVisual.ts`,
+compartilhado com `HistoricoScreen.tsx` (evita duplicar esse mapeamento).
+
+**Cartão de destaques** (ponto forte / a melhorar): no topo da tela, calculado
+a partir do mesmo `porTipo` dos gráficos — sem chamada nova. Regras pra não
+tirar conclusão precipitada: só considera um tipo se já foi jogado pelo menos
+2 vezes (`LIMIAR_PARTIDAS_PARA_INSIGHT`), e só destaca "ponto forte vs. praticar
+mais" se a diferença for de pelo menos 10 pontos percentuais
+(`DIFERENCA_MINIMA_PARA_DESTACAR`) — caso contrário mostra uma mensagem neutra
+("equilibrado" ou "jogue mais tipos diferentes"). Tom sempre encorajador,
+nunca "você é ruim em X" — propositalmente, por ser um app pra criança.
+
+### `EditarPerfilScreen.tsx` / `PUT /usuarios/perfil`
+
+Editar só **nome e idade** por enquanto (decisão deliberada: avatar
+personalizável fica pra Fase 4, junto da loja de moedas mágicas — fazer ele
+pela metade aqui seria retrabalho). Nome passa pelas mesmas duas camadas de
+validação do cadastro: `@Pattern` no `EditarPerfilRequestDTO` (só
+letras/espaço/hífen/apóstrofo) e `FiltroDeNomeService.contemPalavraProibida()`
+(mesmo filtro de palavras impróprias) — faz sentido, já que o nome aparece no
+ranking público mesmo depois de editado. Acessível pelo link "✏️ Editar
+perfil" logo abaixo do nome na `PerfilScreen.tsx`.
 
 ```ts
 export const API_URL = 'http://SEU_IP_AQUI:8080';

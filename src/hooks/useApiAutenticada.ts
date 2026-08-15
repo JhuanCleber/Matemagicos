@@ -27,6 +27,8 @@ export function useApiAutenticada() {
         return await fazerChamada(token);
       } catch (erro: any) {
         // Erro diferente de "token expirado" — não é problema nosso, repassa pra tela
+        // (isso já cobre falha de conexão na chamada original: erro.status vem undefined
+        // nesse caso, então cai aqui e é repassado sem mexer na sessão)
         if (erro?.status !== 401) {
           throw erro;
         }
@@ -47,8 +49,17 @@ export function useApiAutenticada() {
 
           // Repete a chamada original, agora com o token novo
           return await fazerChamada(respostaRefresh.token);
-        } catch {
-          // Refresh token também inválido/expirado — não tem mais como recuperar, desloga de vez
+        } catch (erroRefresh: any) {
+          // Não deu pra renovar por FALTA DE CONEXÃO — não é a sessão que expirou,
+          // é só falta de internet. Não desloga: o token antigo pode voltar a
+          // funcionar sozinho assim que a conexão voltar (ele só está perto de
+          // expirar, não necessariamente já expirou de verdade).
+          if (erroRefresh?.semConexao) {
+            throw erroRefresh;
+          }
+
+          // Refresh token também inválido/expirado de verdade — aí sim não tem
+          // mais como recuperar, desloga de vez
           await deslogar();
           throw new Error('Sua sessão expirou. Faça login novamente.');
         }

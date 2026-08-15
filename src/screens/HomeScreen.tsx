@@ -93,7 +93,7 @@ export default function HomeScreen({ navigation }: Props) {
           </Text>
           <Text style={styles.nome}>Pronto para aprender?</Text>
         </View>
-        <TouchableOpacity style={styles.avatar}>
+        <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Perfil')}>
           <Text style={styles.avatarTexto}>🧒</Text>
         </TouchableOpacity>
       </View>

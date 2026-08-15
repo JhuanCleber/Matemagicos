@@ -51,14 +51,23 @@ export async function buscarRankingApi(token: string): Promise<RespostaRanking> 
 
     return dados as RespostaRanking;
   } catch (erro: any) {
-    if (erro?.name === 'AbortError') {
-      throw new Error('Tempo esgotado. Verifique sua conexão e se o servidor está rodando.');
-    }
-    // Se já tem "status", é um erro HTTP que montamos acima (mensagem já pronta) — repassa como está
+    // Erro HTTP normal (já tem status) — não é falha de conexão, repassa como está
     if (erro?.status !== undefined) {
       throw erro;
     }
-    throw new Error(erro?.message || 'Não foi possível contatar o servidor.');
+
+    // Falha de conexão de verdade — essa chamada é segura de repetir automaticamente
+    // (é só leitura), por isso marcamos semConexao: quem chamar pode envolver isso
+    // com utils/fetchComRetry.ts
+    if (erro?.name === 'AbortError') {
+      const e: any = new Error('O servidor demorou pra responder. Verifique sua conexão.');
+      e.semConexao = true;
+      throw e;
+    }
+
+    const e: any = new Error('Sem conexão com a internet. Verifique o Wi-Fi ou os dados móveis e tente de novo.');
+    e.semConexao = true;
+    throw e;
   } finally {
     clearTimeout(timeout);
   }
