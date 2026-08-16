@@ -115,6 +115,13 @@ export default function PerfilScreen({ navigation }: Props) {
         <View style={styles.espacoBotaoSair}>
           <BotaoGrande titulo="Sair" icone="🚪" onPress={handleSair} cor={colors.danger} />
         </View>
+
+        <TouchableOpacity
+          style={styles.linkExcluirConta}
+          onPress={() => navigation.navigate('ExcluirConta')}
+        >
+          <Text style={styles.linkExcluirContaTexto}>Excluir minha conta</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -277,5 +284,15 @@ const styles = StyleSheet.create({
   },
   espacoBotaoSair: {
     marginTop: 4,
+  },
+  linkExcluirConta: {
+    alignItems: 'center',
+    marginTop: 18,
+    paddingVertical: 8,
+  },
+  linkExcluirContaTexto: {
+    color: colors.danger,
+    fontSize: 12,
+    opacity: 0.7,
   },
 });

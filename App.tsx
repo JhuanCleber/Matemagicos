@@ -13,6 +13,7 @@ import RedefinirSenhaScreen from './src/screens/RedefinirSenhaScreen';
 import VerificarEmailScreen from './src/screens/VerificarEmailScreen';
 import PerfilScreen from './src/screens/PerfilScreen';
 import EditarPerfilScreen from './src/screens/EditarPerfilScreen';
+import ExcluirContaScreen from './src/screens/ExcluirContaScreen';
 import HistoricoScreen from './src/screens/HistoricoScreen';
 import EvolucaoScreen from './src/screens/EvolucaoScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
@@ -55,6 +56,7 @@ function AppNavigator() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />
           <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} />
+          <Stack.Screen name="ExcluirConta" component={ExcluirContaScreen} />
           <Stack.Screen name="Historico" component={HistoricoScreen} />
           <Stack.Screen name="Evolucao" component={EvolucaoScreen} />
           <Stack.Screen name="VerificarEmail" component={VerificarEmailScreen} />

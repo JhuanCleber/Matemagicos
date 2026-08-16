@@ -258,6 +258,23 @@ letras/espaço/hífen/apóstrofo) e `FiltroDeNomeService.contemPalavraProibida()
 ranking público mesmo depois de editado. Acessível pelo link "✏️ Editar
 perfil" logo abaixo do nome na `PerfilScreen.tsx`.
 
+### `ExcluirContaScreen.tsx` / `DELETE /usuarios/conta`
+
+Exige a senha atual (dupla confirmação: campo de senha + `Alert.alert` nativo
+antes de executar). `UsuarioService.excluirConta()` roda dentro de
+`@Transactional` — se qualquer passo falhar no meio, nada é apagado (tudo ou
+nada). **Ordem de exclusão importa** (por causa das chaves estrangeiras):
+`desempenho_jogo` → `avaliacao_final` → `pontuacao_historico` →
+`refresh_tokens`/`password_reset_tokens`/`email_verification_tokens` → só por
+último o `usuario` em si. Se um dia uma tabela nova passar a referenciar
+`id_usuario`, adicionar a exclusão dela aqui também, na ordem certa (antes do
+`repository.delete(u)`), senão a exclusão vai falhar por violação de FK.
+Protegida pelo mesmo `RateLimitFilter` do login (5 tentativas de senha erradas
+por 15min) — `RateLimitFilterConfig` cobre `/usuarios/conta` além de `/auth/*`.
+Link discreto (texto pequeno, cor de alerta, sem ser um botão chamativo) no
+fim da `PerfilScreen.tsx`, de propósito — ação irreversível não deveria ser
+fácil de tocar sem querer.
+
 ```ts
 export const API_URL = 'http://SEU_IP_AQUI:8080';
 ```
@@ -327,9 +344,9 @@ Nada disso é versionado no Git (por design — são segredos/config local):
 ## O que já foi implementado (checklist de fundação — completo)
 
 1. ✅ Segurança: `/usuarios` e outras rotas protegidas por JWT
-2. ✅ JWT completo (login E cadastro geram token)
+2. ✅ JWT completo (login E cadastro geram token, com refresh token de sessão longa)
 3. ✅ Segredos fora do código (variáveis de ambiente)
-4. ✅ Script SQL completo (6 tabelas) + `data.sql` (seed dos jogos, idempotente)
+4. ✅ Script SQL completo (10 tabelas) + `data.sql` (seed dos jogos, idempotente)
 5. ✅ Código back-end sem duplicação (DTO mapping centralizado)
 6. ✅ Erro 500 não vaza detalhe interno
 7. ✅ Mensagens de erro por campo no front
@@ -342,11 +359,17 @@ Nada disso é versionado no Git (por design — são segredos/config local):
 14. ✅ Molde de jogo completo: perguntas, múltipla escolha, dificuldade, pontuação
 15. ✅ Sons e animações
 16. ✅ Sistema de ranking
+17. ✅ Recuperação de senha e verificação de email (por código, via Gmail SMTP)
+18. ✅ Rate limiting + filtro de nome impróprio (proteção do ranking público)
+19. ✅ Tratamento de sem-internet + retry automático seguro (só leitura)
+20. ✅ Perfil, histórico de partidas, gráficos de evolução, editar perfil e excluir conta
 
 ## Possíveis próximos passos (nenhum é bloqueante)
 
 - Painel de administrador (criar jogos dinamicamente, hoje só via `data.sql`)
 - Mais variedade de perguntas / dificuldade "difícil"
-- Tela de perfil / histórico de partidas (usando `desempenho_jogo` e `pontuacao_historico`, que já existem no banco)
+- Gamificação (conquistas, streak diário, avatar personalizável + loja de moedas mágicas)
 - Revisão de LGPD/responsável — **só se for publicar de verdade nas lojas**
-- `AvaliacaoFinalRepository` já existe mas não tem service/controller — reservado pra uma futura funcionalidade de feedback consolidado (ex: feedback por IA), não implementada ainda
+- `AvaliacaoFinalRepository`/tabela `avaliacao_final` já existem mas sem
+  service/controller de verdade (só usados na exclusão de conta) — reservado
+  pra uma futura funcionalidade de feedback consolidado (ex: feedback por IA)
