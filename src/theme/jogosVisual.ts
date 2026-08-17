@@ -17,6 +17,11 @@ export const VISUAL_POR_TIPO: Record<string, VisualJogo> = {
   divisao: { icone: '➗', cor: colors.danger, nome: 'Divisão' },
   geometria: { icone: '🔷', cor: '#9B59B6', nome: 'Formas Geométricas' },
   contagem: { icone: '🔢', cor: '#3498DB', nome: 'Contagem' },
+  sequencia: { icone: '🔮', cor: '#16A085', nome: 'Sequência Numérica' },
+  comparacao: { icone: '⚖️', cor: '#E67E22', nome: 'Comparação' },
+  horas: { icone: '🕒', cor: '#2980B9', nome: 'Horas' },
+  dinheiro: { icone: '💰', cor: '#D4AC0D', nome: 'Dinheiro' },
+  fracoes: { icone: '🍕', cor: '#8E44AD', nome: 'Frações' },
 };
 
 export const VISUAL_PADRAO: VisualJogo = { icone: '🎮', cor: colors.textLight, nome: 'Jogo' };
