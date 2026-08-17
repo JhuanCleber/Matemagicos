@@ -206,7 +206,7 @@ src/main/java/com/matemagicos/biblioteca/
 
 src/main/resources/
 ├── application.properties              # tudo sensível vem de variável de ambiente
-└── data.sql                            # popula os 6 jogos automaticamente (idempotente)
+└── data.sql                            # popula os 11 jogos automaticamente (idempotente)
 
 database/
 └── 01_create_database.sql              # cria banco + 9 tabelas, com IF NOT EXISTS
@@ -242,17 +242,23 @@ src/
 
 ---
 
-## 7. Próximos passos (Fase 3 — em andamento)
+## 7. Próximos passos (Fase 4 — em andamento)
 
 O roadmap completo (Fases 1 a 12, com o que já está pronto e o que falta)
-está detalhado no `CLAUDE.md`. Resumo da fase atual — **conteúdo dos jogos**:
+está detalhado no `CLAUDE.md`. **Fase 3 (conteúdo dos jogos) concluída** —
+dificuldade fácil/média/difícil com problemas em texto, configuração de
+dificuldade/modo adaptativo/modo sem pressão antes da partida, revisão final
+das perguntas erradas, e 5 jogos novos (sequência, comparação, relógio,
+dinheiro, frações — catálogo foi de 6 pra 11 jogos).
 
-- Dificuldade "difícil" de verdade
-- Mais variações de pergunta (formato de problema/texto)
-- Repetir só as perguntas erradas no fim de uma partida
-- Modo "sem pressão" sem timer
-- Dificuldade adaptativa
-- Jogos novos: sequência numérica, comparação (`<` `>` `=`), relógio/horas, dinheiro, frações
+Resumo da fase atual — **gamificação**:
+
+- Conquistas/medalhas
+- Streak diário
+- Barra de progresso por jogo
+- Níveis/títulos
+- Avatar customizável
+- Loja de recompensas com moedas mágicas
 
 📌 Se um dia o app for publicado de verdade (Play Store/App Store): revisar o
 fluxo de cadastro para incluir um responsável/adulto, por causa da LGPD e das

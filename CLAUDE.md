@@ -7,9 +7,11 @@ retrabalho.
 
 > **Nota de handoff (IA):** este arquivo foi escrito originalmente com apoio de
 > outra IA (Claude) e agora o projeto passa a ser trabalhado com você. As
-> Fases 1 e 2 do roadmap (ver seção "Checklist de melhorias" no fim) estão
-> **completas**. **A tarefa atual é só a Fase 3** ("Conteúdo dos jogos") — não
-> comece nenhuma outra fase sem o usuário pedir explicitamente.
+> Fases 1, 2 e 3 do roadmap (ver seção "Checklist de melhorias" no fim) estão
+> **completas** (a Fase 3 foi implementada pelo Codex — ver nota na seção da
+> Fase 3 sobre o nível de detalhe disponível aqui). **A tarefa atual é só a
+> Fase 4** ("Gamificação") — não comece nenhuma outra fase sem o usuário
+> pedir explicitamente.
 
 ---
 
@@ -88,7 +90,7 @@ src/main/java/com/matemagicos/biblioteca/
 src/main/resources/
 ├── application.properties           # senha, JWT_SECRET, MAIL_USERNAME/PASSWORD vêm de variável
 │                                     # de ambiente (nunca hardcoded)
-└── data.sql                         # popula os 6 jogos automaticamente (idempotente, com WHERE NOT EXISTS)
+└── data.sql                         # popula os 11 jogos automaticamente (idempotente, com WHERE NOT EXISTS)
 
 database/
 └── 01_create_database.sql           # cria banco + 9 tabelas, com IF NOT EXISTS (nunca apaga dados)
@@ -134,8 +136,11 @@ src/
 │   ├── rankingService.ts        # GET /ranking
 │   └── perfilService.ts         # PUT /usuarios/perfil, DELETE /usuarios/conta
 ├── game/
-│   └── perguntas.ts             # gera perguntas por tipoOperacao + dificuldade, com variação de frase
-│                                 # (ALVO PRINCIPAL DA FASE 3 — ver checklist no fim do arquivo)
+│   └── perguntas.ts             # gera perguntas por tipoOperacao + dificuldade, com variação de frase.
+│                                 # Desde a Fase 3, também suporta dificuldade fácil/média/difícil de
+│                                 # verdade, perguntas em formato de problema de texto, e os 5 tipos de
+│                                 # jogo novos (sequência, comparação, horas, dinheiro, frações). Ver nota
+│                                 # de revisão pendente na seção da Fase 3, no fim do arquivo.
 ├── screens/
 │   ├── LoginScreen, CadastroScreen, HomeScreen
 │   ├── EsqueciSenhaScreen, RedefinirSenhaScreen   # recuperação de senha por código
@@ -205,6 +210,12 @@ Persiste tudo no AsyncStorage (`@matemagicos:sessao`). `deslogar()` já chama
   precisar resetar cada state manualmente).
 - Se der erro (inclusive sem conexão), mostra botão manual de "Tentar salvar
   de novo" — de propósito manual, não automático, pelo motivo do parágrafo acima.
+- **Desde a Fase 3** (implementada pelo Codex, detalhe não revisado aqui —
+  ler o arquivo antes de mexer): ganhou uma etapa de configuração antes de
+  começar a partida (escolher dificuldade fácil/média/difícil, ativar modo
+  adaptativo, ativar modo "sem pressão" sem cronômetro), e uma revisão final
+  no fim da partida que repete só as perguntas erradas, sem alterar a
+  pontuação já ganha na tentativa original.
 
 ### `api.ts` — ⚠️ PRECISA SER AJUSTADO A CADA REDE NOVA
 
@@ -472,7 +483,7 @@ de propósito.
 
 ---
 
-## O que já foi implementado (Fases 1 e 2 — completas)
+## O que já foi implementado (Fases 1, 2 e 3 — completas)
 
 **Fundação técnica:**
 
@@ -506,46 +517,71 @@ de propósito.
 26. ✅ Editar perfil (nome, idade)
 27. ✅ Excluir conta (com exclusão em cascata correta + confirmação de senha)
 
+**Conteúdo dos jogos (Fase 3 — implementada pelo Codex):**
+28. ✅ Dificuldade fácil/média/difícil de verdade, com perguntas em formato de problema de texto
+29. ✅ Configuração antes da partida: dificuldade, modo adaptativo, modo "sem pressão" (sem cronômetro)
+30. ✅ Revisão final repetindo só as perguntas erradas, sem alterar a pontuação original
+31. ✅ 5 jogos novos: sequência numérica, comparação, relógio/horas, dinheiro, frações (catálogo foi de 6 pra 11 jogos)
+
+> ⚠️ **Nota sobre o nível de detalhe da Fase 3 neste arquivo**: diferente das
+> Fases 1 e 2 (implementadas com revisão de código completa, arquivo por
+> arquivo), a Fase 3 foi implementada pelo Codex diretamente no repositório do
+> usuário, sem passar por revisão aqui. O que está documentado acima vem do
+> resumo que o Codex reportou (dificuldades, modos de jogo, 5 tipos novos,
+> arquivos tocados: `game/perguntas.ts`, `screens/HomeScreen.tsx`,
+> `screens/JogoScreen.tsx`, `theme/jogosVisual.ts`, `data.sql`), não de leitura
+> direta do código. **Antes de editar qualquer um desses 5 arquivos na Fase 4
+> (ou depois), releia o conteúdo atual deles primeiro** — nomes exatos de
+> `tipoOperacao` dos jogos novos, estrutura de dificuldade em `perguntas.ts`,
+> e como a configuração pré-partida foi implementada em `JogoScreen.tsx` ainda
+> não foram conferidos linha a linha aqui.
+
 ---
 
 ## Checklist de melhorias (roadmap completo)
 
 Lista maior de tudo que pode ser adicionado/melhorado, organizada por fase.
-**Fases 1 e 2 estão prontas** (ver checklist acima). As fases seguintes são
+**Fases 1, 2 e 3 estão prontas** (ver checklist acima). As fases seguintes são
 possíveis próximos passos, nenhuma é bloqueante.
 
-### 🥉 Fase 3 — Conteúdo dos jogos (**TAREFA ATUAL — só isso por enquanto**)
+### ✅ Fase 3 — Conteúdo dos jogos (concluída pelo Codex)
 
-14. Dificuldade "difícil" de verdade (hoje só fácil/médio existem em `game/perguntas.ts`)
-15. Mais variações de pergunta (formato de problema/texto: "Maria tinha 5 maçãs...")
-16. Repetir só as perguntas que errou no fim de uma partida
-17. Modo "sem pressão" sem timer
-18. Dificuldade adaptativa (sobe/desce sozinha conforme os acertos)
-19. Jogo de sequência numérica (completar padrões: 2, 4, 6, __)
-20. Jogo de comparação (maior/menor/igual com símbolos < > =)
-21. Jogo de relógio/horas
-22. Jogo de dinheiro (reconhecer cédulas/moedas, somar valores)
-23. Jogo de frações (introdução simples, visual, pra 8-10 anos)
+14. ✅ Dificuldade "difícil" de verdade
+15. ✅ Mais variações de pergunta (formato de problema/texto)
+16. ✅ Repetir só as perguntas que errou no fim de uma partida
+17. ✅ Modo "sem pressão" sem timer
+18. ✅ Dificuldade adaptativa
+19. ✅ Jogo de sequência numérica
+20. ✅ Jogo de comparação (maior/menor/igual)
+21. ✅ Jogo de relógio/horas
+22. ✅ Jogo de dinheiro
+23. ✅ Jogo de frações
 
-**Antes de começar a Fase 3:** o arquivo-chave é `src/game/perguntas.ts`
-(gera perguntas por `tipoOperacao` + `dificuldade`) — leia ele primeiro, não
-foi revisado neste handoff. Novos jogos (sequência, comparação, relógio,
-dinheiro, frações) provavelmente precisam de: novo `tipoOperacao` em
-`perguntas.ts`, nova entrada no array `JOGOS` de `HomeScreen.tsx`, nova linha
-correspondente em `data.sql` (**lembrar do combinado #3**: entregar o `.sql`
-completo, nunca pedir pra rodar `INSERT` manual), e possivelmente um ícone
-novo em `theme/jogosVisual.ts` se o tipo aparecer em histórico/evolução.
-`JogoScreen.tsx` já é genérica o bastante pra não precisar de mudança
-estrutural pra tipos de jogo novos, contanto que `perguntas.ts` devolva o
-mesmo formato de `Pergunta` (múltipla escolha) — se um jogo novo precisar de
-UI diferente (ex: relógio visual, cédulas de dinheiro), aí sim pode exigir
-mudança na tela ou uma tela nova.
+### 🥉 Fase 4 — Gamificação (**TAREFA ATUAL — só isso por enquanto**)
+
+24. Conquistas/medalhas (ex: "10 partidas seguidas sem errar", "jogou todo dia por 1 semana")
+25. Streak diário (sequência de dias jogando, com incentivo visual)
+26. Barra de progresso visível por jogo (não só pontuação total)
+27. Níveis/títulos (ex: "Aprendiz de Matemágico" → "Mestre Matemágico" conforme pontos totais)
+28. Avatar customizável (escolher entre personagens/cores, comprar com moedas mágicas)
+29. Loja de recompensas (gastar moedas mágicas em algo — avatar, tema, moldura de perfil)
+
+**Antes de começar a Fase 4:** o avatar customizável foi deliberadamente
+adiado até aqui (ver "Decisões de arquitetura" — `EditarPerfilScreen.tsx` hoje
+só edita nome e idade, sem avatar). Esse é o momento certo de implementar
+avatar + loja juntos, já que a loja gasta moedas mágicas que já existem no
+`usuario.moedasMagicas`. Prováveis pontos de mudança: `PerfilScreen.tsx` e
+`EditarPerfilScreen.tsx` (mostrar/trocar avatar), um novo campo no `Usuario`
+(ex: `avatarId` ou similar) + `UsuarioDTO` + migração no `.sql` (lembrar do
+combinado #3), possivelmente uma nova tabela pra itens da loja se for além de
+um enum simples, e um novo endpoint pra "comprar"/"equipar" item (validando
+saldo de moedas no back, nunca confiar em valor vindo do front). Conquistas/
+streak/níveis provavelmente precisam de lógica nova em
+`DesempenhoJogoService` (ou um service novo) pra calcular quando uma
+conquista é desbloqueada, e possivelmente uma tabela nova pra guardar quais
+conquistas cada usuário já tem.
 
 ### Fases seguintes (NÃO fazer agora, só se o usuário pedir explicitamente)
-
-**Fase 4 — Gamificação:** conquistas/medalhas, streak diário, barra de
-progresso por jogo, níveis/títulos, avatar customizável, loja de recompensas
-com moedas mágicas.
 
 **Fase 5 — Experiência infantil (UX):** onboarding/tutorial inicial,
 boas-vindas por jogo, feedback sonoro/visual mais rico, mascote do app,
