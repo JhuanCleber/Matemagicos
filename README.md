@@ -1,5 +1,6 @@
 # Matemágicos — Setup completo (Banco + Back + Front)
 
+npx expo start
 Este guia conecta as três pontas: **MySQL**, **Spring Boot** e **React Native
 (Expo)**. Pra contexto completo do projeto (decisões, pegadinhas já
 resolvidas, roadmap), ver `CLAUDE.md` na raiz do repositório do back-end.

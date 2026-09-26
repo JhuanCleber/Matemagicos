@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { useUsuario } from '../context/UsuarioContext';
+import { obterAvatar } from '../theme/avatarVisual';
 
 interface Props {
   navigation: any;
@@ -121,6 +122,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const { usuario, deslogar } = useUsuario();
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
+  const avatar = obterAvatar(usuario?.avatarId, usuario?.molduraId);
 
   async function handleSair() {
     await deslogar();
@@ -138,8 +140,8 @@ export default function HomeScreen({ navigation }: Props) {
           </Text>
           <Text style={styles.nome}>Pronto para aprender?</Text>
         </View>
-        <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Perfil')}>
-          <Text style={styles.avatarTexto}>🧒</Text>
+        <TouchableOpacity style={[styles.avatar, { borderColor: avatar.cor }]} onPress={() => navigation.navigate('Perfil')}>
+          <Text style={styles.avatarTexto}>{avatar.emoji}</Text>
         </TouchableOpacity>
       </View>
 
@@ -158,7 +160,7 @@ export default function HomeScreen({ navigation }: Props) {
       <TouchableOpacity
         style={styles.cardProgresso}
         activeOpacity={0.8}
-        onPress={() => navigation.navigate('Ranking')}
+        onPress={() => navigation.navigate('Gamificacao')}
       >
         <View style={styles.progressoInfo}>
           <Text style={styles.progressoTitulo}>⭐ Sua jornada</Text>
@@ -167,7 +169,7 @@ export default function HomeScreen({ navigation }: Props) {
           </Text>
         </View>
         <Text style={styles.progressoTexto}>
-          🏆 Toque aqui pra ver o ranking!
+          🔥 Toque para ver sua jornada e a loja!
         </Text>
       </TouchableOpacity>
 

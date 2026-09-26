@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
+import { obterAvatar } from '../theme/avatarVisual';
 
 interface Props {
   navigation: any;
@@ -19,6 +20,7 @@ function LinhaInfo({ label, valor }: { label: string; valor: string }) {
 
 export default function PerfilScreen({ navigation }: Props) {
   const { usuario, deslogar } = useUsuario();
+  const avatar = obterAvatar(usuario?.avatarId, usuario?.molduraId);
 
   async function handleSair() {
     await deslogar();
@@ -41,8 +43,8 @@ export default function PerfilScreen({ navigation }: Props) {
 
       <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
         <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarTexto}>🧒</Text>
+          <View style={[styles.avatar, { borderColor: avatar.cor }]}>
+            <Text style={styles.avatarTexto}>{avatar.emoji}</Text>
           </View>
           <Text style={styles.nome}>{usuario.nome}</Text>
           <TouchableOpacity
@@ -110,6 +112,14 @@ export default function PerfilScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('Evolucao')}
         >
           <Text style={styles.linkRankingTexto}>📊 Ver minha evolução</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.linkRanking}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Gamificacao')}
+        >
+          <Text style={styles.linkRankingTexto}>✨ Minha jornada, conquistas e loja</Text>
         </TouchableOpacity>
 
         <View style={styles.espacoBotaoSair}>

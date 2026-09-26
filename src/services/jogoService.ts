@@ -1,4 +1,5 @@
 import { API_URL, API_TIMEOUT_MS } from '../config/api';
+import { Conquista } from './gamificacaoService';
 
 export interface DesempenhoPayload {
   idJogo: number;
@@ -13,6 +14,7 @@ export interface ResultadoDesempenho {
   pontosGanhos: number;
   totalPontosAtualizado: number;
   moedasMagicasAtualizado: number;
+  novasConquistas?: Conquista[];
 }
 
 export interface RespostaDesempenho {

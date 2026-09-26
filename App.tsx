@@ -16,6 +16,7 @@ import EditarPerfilScreen from './src/screens/EditarPerfilScreen';
 import ExcluirContaScreen from './src/screens/ExcluirContaScreen';
 import HistoricoScreen from './src/screens/HistoricoScreen';
 import EvolucaoScreen from './src/screens/EvolucaoScreen';
+import GamificacaoScreen from './src/screens/GamificacaoScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
 import { useConectividade } from './src/hooks/useConectividade';
 import { colors } from './src/theme/colors';
@@ -59,6 +60,7 @@ function AppNavigator() {
           <Stack.Screen name="ExcluirConta" component={ExcluirContaScreen} />
           <Stack.Screen name="Historico" component={HistoricoScreen} />
           <Stack.Screen name="Evolucao" component={EvolucaoScreen} />
+          <Stack.Screen name="Gamificacao" component={GamificacaoScreen} />
           <Stack.Screen name="VerificarEmail" component={VerificarEmailScreen} />
           <Stack.Screen name="Jogo" component={JogoScreen} />
           <Stack.Screen name="Ranking" component={RankingScreen} />

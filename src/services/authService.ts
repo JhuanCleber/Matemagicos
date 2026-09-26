@@ -10,6 +10,8 @@ export interface Usuario {
   totalPontos?: number;
   moedasMagicas?: number;
   emailVerificado?: boolean;
+  avatarId?: string;
+  molduraId?: string;
 }
 
 export interface RespostaAuth {

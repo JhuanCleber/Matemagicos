@@ -338,6 +338,7 @@ export default function JogoScreen({ navigation, route }: Props) {
           {enviando && <View style={styles.statusBox}><ActivityIndicator color={colors.white} /><Text style={styles.statusTexto}>Salvando seu resultado...</Text></View>}
           {erroEnvio && <View style={styles.statusBox}><Text style={styles.erroTexto}>{erroEnvio}</Text><BotaoGrande titulo="Tentar salvar de novo" icone="🔄" onPress={enviarResultado} cor={colors.danger} /></View>}
           {resultado && <View style={styles.pontosBox}><Text style={styles.pontosTexto}>+{resultado.pontosGanhos} pontos ⭐</Text><Text style={styles.pontosSubtexto}>Total: {resultado.totalPontosAtualizado} pontos • {resultado.moedasMagicasAtualizado} moedas mágicas</Text></View>}
+          {resultado?.novasConquistas?.map((conquista) => <View key={conquista.id} style={styles.conquistaNova}><Text style={styles.conquistaNovaTexto}>{conquista.icone} Nova conquista: {conquista.nome}!</Text></View>)}
 
           <BotaoGrande titulo="Jogar de novo" icone="🔁" onPress={handleJogarDeNovo} cor={colors.success} />
           <BotaoGrande titulo="Voltar para Home" icone="🏠" onPress={() => navigation.navigate('Home')} cor={colors.secondary} />
@@ -428,4 +429,6 @@ const styles = StyleSheet.create({
   pontosBox: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', marginBottom: 24, width: '100%' },
   pontosTexto: { fontSize: 22, fontWeight: 'bold', color: colors.white, marginBottom: 4 },
   pontosSubtexto: { fontSize: 13, color: colors.white, opacity: 0.9, textAlign: 'center' },
+  conquistaNova: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 14, padding: 12, marginBottom: 10, width: '100%' },
+  conquistaNovaTexto: { color: colors.white, fontWeight: 'bold', textAlign: 'center' },
 });

@@ -10,7 +10,7 @@ retrabalho.
 > Fases 1, 2 e 3 do roadmap (ver seção "Checklist de melhorias" no fim) estão
 > **completas** (a Fase 3 foi implementada pelo Codex — ver nota na seção da
 > Fase 3 sobre o nível de detalhe disponível aqui). **A tarefa atual é só a
-> Fase 4** ("Gamificação") — não comece nenhuma outra fase sem o usuário
+> Fase 4** ("Gamificação") foi concluída. Não comece nenhuma outra fase sem o usuário
 > pedir explicitamente.
 
 ---
@@ -94,6 +94,9 @@ src/main/resources/
 
 database/
 └── 01_create_database.sql           # cria banco + 9 tabelas, com IF NOT EXISTS (nunca apaga dados)
+
+postman/
+└── Matemagicos_postman_collection.json  # coleção completa — atualizar aqui a cada rota nova/mudada
 ```
 
 ### Regras de pontuação (em `DesempenhoJogoService`)
@@ -159,7 +162,7 @@ src/
 
 Stack completo: `Login`, `Cadastro`, `EsqueciSenha`, `RedefinirSenha`, `Home`,
 `Perfil`, `EditarPerfil`, `ExcluirConta`, `VerificarEmail`, `Historico`,
-`Evolucao`, `Jogo` (com params), `Ranking`. Tela inicial decidida
+`Evolucao`, `Gamificacao`, `Jogo` (com params), `Ranking`. Tela inicial decidida
 dinamicamente: se já tem sessão salva no AsyncStorage (`estaLogado`), abre
 direto na `Home`; senão, `Login`. Enquanto checa, mostra um loading
 (`AppNavigator` em `App.tsx`). Um banner flutuante global (`AvisoSemConexao`,
@@ -281,10 +284,9 @@ Nada disso é versionado no Git (por design — são segredos/config local):
   acumulados, a próxima tentativa (mesmo certa) ainda fica bloqueada até a
   janela passar — isso é intencional e inerente a qualquer rate limiter de
   verdade (senão a proteção contra força bruta não protegeria nada).
-- **Avatar personalizável NÃO faz parte da tela de perfil atual**: decisão
-  deliberada de adiar pra quando a Fase 4 (gamificação/loja de moedas
-  mágicas) for feita — fazer o avatar pela metade agora seria retrabalho.
-  `EditarPerfilScreen.tsx` hoje só edita nome e idade.
+- **Avatar personalizável é configurado na tela `GamificacaoScreen.tsx`**:
+  ela concentra a loja e aplica o avatar/moldura escolhidos no perfil e na
+  Home. `EditarPerfilScreen.tsx` continua editando somente nome e idade.
 - **Exclusão de conta apaga tudo, na ordem certa**: `desempenho_jogo` →
   `avaliacao_final` → `pontuacao_historico` → `refresh_tokens` /
   `password_reset_tokens` / `email_verification_tokens` → só por último o
@@ -319,7 +321,7 @@ Nada disso é versionado no Git (por design — são segredos/config local):
 ## Combinados de como trabalhar juntos
 
 1. **Se um arquivo sumir do ambiente da IA** (acontece por limpeza automática entre sessões/mensagens), **pedir pro usuário reenviar antes de editar** — nunca reconstruir de memória sem avisar.
-2. **Qualquer mudança que envolva o Postman**: sempre entregar a coleção `.json` **completa e atualizada**, pronta pra importar — nunca pedir pra adicionar campo/requisição manualmente.
+2. **Qualquer mudança que envolva o Postman**: sempre entregar a coleção `.json` **completa e atualizada**, pronta pra importar — nunca pedir pra adicionar campo/requisição manualmente. O arquivo mora em `postman/Matemagicos_postman_collection.json`, na raiz do repositório do back-end (mesmo nível de `database/`) — **atualizar esse arquivo no repositório diretamente** quando alguma rota mudar, em vez de só descrever a mudança em texto.
 3. **Qualquer mudança que envolva o banco de dados**: sempre entregar o `01_create_database.sql` **completo e atualizado** (com `IF NOT EXISTS`, nunca apagando dados existentes), pronto pra rodar no MySQL Workbench — nunca pedir pra criar tabela/coluna manualmente.
 4. **Qualquer mudança que exija algo fora do editor** (variável de ambiente, conta externa tipo Gmail, configuração do sistema): sempre avisar explicitamente o que precisa ser feito, e separar claramente o que é "faça uma vez só, vale pra sempre" (ex: gerar uma senha de app) do que é "precisa repetir em cada computador" (ex: criar a variável de ambiente local) — o usuário alterna entre dois computadores.
 5. O usuário tem pouca experiência prévia com o ecossistema (Maven, Git, variáveis de ambiente) — explicações passo a passo, sem pular etapas, funcionam melhor que respostas condensadas.
@@ -444,8 +446,9 @@ mensagem neutra. Tom sempre encorajador, nunca "você é ruim em X".
 
 ### `EditarPerfilScreen.tsx` / `PUT /usuarios/perfil`
 
-Editar só **nome e idade** por enquanto (avatar fica pra Fase 4 — ver
-"Decisões de arquitetura"). Nome passa pelas mesmas validações do cadastro.
+Editar só **nome e idade**. Avatar e moldura são escolhidos na tela de
+gamificação/loja, que valida compra e equipamento no back-end. Nome passa
+pelas mesmas validações do cadastro.
 
 ### `ExcluirContaScreen.tsx` / `DELETE /usuarios/conta`
 
@@ -557,29 +560,21 @@ possíveis próximos passos, nenhuma é bloqueante.
 22. ✅ Jogo de dinheiro
 23. ✅ Jogo de frações
 
-### 🥉 Fase 4 — Gamificação (**TAREFA ATUAL — só isso por enquanto**)
+### ✅ Fase 4 — Gamificação (concluída)
 
-24. Conquistas/medalhas (ex: "10 partidas seguidas sem errar", "jogou todo dia por 1 semana")
-25. Streak diário (sequência de dias jogando, com incentivo visual)
-26. Barra de progresso visível por jogo (não só pontuação total)
-27. Níveis/títulos (ex: "Aprendiz de Matemágico" → "Mestre Matemágico" conforme pontos totais)
-28. Avatar customizável (escolher entre personagens/cores, comprar com moedas mágicas)
-29. Loja de recompensas (gastar moedas mágicas em algo — avatar, tema, moldura de perfil)
+24. ✅ Conquistas/medalhas (inclui primeira partida, 10 perfeitas, semana de streak, explorar jogos e 1.000 pontos)
+25. ✅ Streak diário (sequência de dias jogando, com incentivo visual)
+26. ✅ Barra de progresso visível por jogo (10 partidas completam cada barra)
+27. ✅ Níveis/títulos (Aprendiz → Explorador → Mago → Mestre → Lenda, por pontos totais)
+28. ✅ Avatar customizável (personagens e molduras persistidos no perfil)
+29. ✅ Loja de recompensas (compra/equipamento validados no back-end; nunca pelo saldo enviado pelo front)
 
-**Antes de começar a Fase 4:** o avatar customizável foi deliberadamente
-adiado até aqui (ver "Decisões de arquitetura" — `EditarPerfilScreen.tsx` hoje
-só edita nome e idade, sem avatar). Esse é o momento certo de implementar
-avatar + loja juntos, já que a loja gasta moedas mágicas que já existem no
-`usuario.moedasMagicas`. Prováveis pontos de mudança: `PerfilScreen.tsx` e
-`EditarPerfilScreen.tsx` (mostrar/trocar avatar), um novo campo no `Usuario`
-(ex: `avatarId` ou similar) + `UsuarioDTO` + migração no `.sql` (lembrar do
-combinado #3), possivelmente uma nova tabela pra itens da loja se for além de
-um enum simples, e um novo endpoint pra "comprar"/"equipar" item (validando
-saldo de moedas no back, nunca confiar em valor vindo do front). Conquistas/
-streak/níveis provavelmente precisam de lógica nova em
-`DesempenhoJogoService` (ou um service novo) pra calcular quando uma
-conquista é desbloqueada, e possivelmente uma tabela nova pra guardar quais
-conquistas cada usuário já tem.
+**Implementação da Fase 4:** `GamificacaoScreen.tsx` consome
+`GET /gamificacao` com retry seguro de leitura e chama as ações de compra e
+equipamento sem retry. A resposta atualiza o `UsuarioContext`, por isso o
+avatar/moldura muda na Home e no Perfil imediatamente. O servidor persiste
+avatarId, molduraId, itens comprados e conquistas; o resultado de uma partida
+também devolve as medalhas recém-desbloqueadas para a `JogoScreen`.
 
 ### Fases seguintes (NÃO fazer agora, só se o usuário pedir explicitamente)
 
