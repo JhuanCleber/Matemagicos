@@ -36,7 +36,7 @@ computador de casa e um do trabalho.
 (Hibernate), MySQL 8, Maven, JWT (`jjwt` 0.12.6), `spring-boot-starter-mail`
 (envio de email via Gmail SMTP).
 
-**Front-end:** React Native + Expo SDK ~54, TypeScript, React Navigation
+**Front-end:** React Native + Expo SDK ~57, TypeScript, React Navigation
 (native-stack), `expo-audio`, `@react-native-async-storage/async-storage`,
 `@react-native-community/netinfo` (detecção de conexão com a internet).
 
