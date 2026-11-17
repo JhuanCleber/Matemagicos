@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginScreen from './src/screens/LoginScreen';
@@ -17,35 +17,47 @@ import ExcluirContaScreen from './src/screens/ExcluirContaScreen';
 import HistoricoScreen from './src/screens/HistoricoScreen';
 import EvolucaoScreen from './src/screens/EvolucaoScreen';
 import GamificacaoScreen from './src/screens/GamificacaoScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import PreferenciasScreen from './src/screens/PreferenciasScreen';
 import { UsuarioProvider, useUsuario } from './src/context/UsuarioContext';
+import { ExperienciaProvider, useExperiencia } from './src/context/ExperienciaContext';
 import { useConectividade } from './src/hooks/useConectividade';
-import { colors } from './src/theme/colors';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <UsuarioProvider>
-      <AppNavigator />
-    </UsuarioProvider>
+    <ExperienciaProvider>
+      <UsuarioProvider>
+        <AppNavigator />
+      </UsuarioProvider>
+    </ExperienciaProvider>
   );
 }
 
 function AppNavigator() {
   const { carregando, estaLogado } = useUsuario();
+  const { carregandoExperiencia, onboardingConcluido, paleta, tema } = useExperiencia();
 
-
-  if (carregando) {
+  if (carregando || carregandoExperiencia) {
     return (
-      <View style={styles.telaCarregando}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.telaCarregando, { backgroundColor: paleta.background }]}>
+        <ActivityIndicator size="large" color={paleta.primary} />
       </View>
     );
   }
 
+  if (!onboardingConcluido) return <OnboardingScreen />;
+
+  const navigationTheme = {
+    ...DefaultTheme,
+    dark: tema === 'escuro',
+    colors: { ...DefaultTheme.colors, background: paleta.background, card: paleta.card, text: paleta.text, primary: paleta.primary },
+  };
+
   return (
-    <View style={styles.raiz}>
-      <NavigationContainer>
+    <View style={[styles.raiz, { backgroundColor: paleta.background }]}>
+      <NavigationContainer theme={navigationTheme}>
         <Stack.Navigator
           initialRouteName={estaLogado ? 'Home' : 'Login'}
           screenOptions={{ headerShown: false }}
@@ -61,6 +73,7 @@ function AppNavigator() {
           <Stack.Screen name="Historico" component={HistoricoScreen} />
           <Stack.Screen name="Evolucao" component={EvolucaoScreen} />
           <Stack.Screen name="Gamificacao" component={GamificacaoScreen} />
+          <Stack.Screen name="Preferencias" component={PreferenciasScreen} />
           <Stack.Screen name="VerificarEmail" component={VerificarEmailScreen} />
           <Stack.Screen name="Jogo" component={JogoScreen} />
           <Stack.Screen name="Ranking" component={RankingScreen} />
@@ -76,14 +89,15 @@ function AppNavigator() {
 // internet — não precisa mexer em cada tela individualmente, fica num lugar só.
 function AvisoSemConexao() {
   const conectado = useConectividade();
+  const { paleta } = useExperiencia();
 
   if (conectado) {
     return null;
   }
 
   return (
-    <View style={styles.avisoConexao} pointerEvents="none">
-      <Text style={styles.avisoConexaoTexto}>📡 Sem conexão com a internet</Text>
+    <View style={[styles.avisoConexao, { backgroundColor: paleta.danger }]} pointerEvents="none">
+      <Text style={[styles.avisoConexaoTexto, { color: paleta.white }]}>📡 Sem conexão com a internet</Text>
     </View>
   );
 }
@@ -96,7 +110,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
   },
   avisoConexao: {
     position: 'absolute',
@@ -105,11 +118,9 @@ const styles = StyleSheet.create({
     right: 0,
     paddingTop: 50,
     paddingBottom: 10,
-    backgroundColor: colors.danger,
     alignItems: 'center',
   },
   avisoConexaoTexto: {
-    color: colors.white,
     fontSize: 13,
     fontWeight: '700',
   },

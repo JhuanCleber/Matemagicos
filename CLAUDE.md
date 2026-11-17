@@ -10,7 +10,7 @@ retrabalho.
 > Fases 1, 2 e 3 do roadmap (ver seção "Checklist de melhorias" no fim) estão
 > **completas** (a Fase 3 foi implementada pelo Codex — ver nota na seção da
 > Fase 3 sobre o nível de detalhe disponível aqui). **A tarefa atual é só a
-> Fase 4** ("Gamificação") foi concluída. Não comece nenhuma outra fase sem o usuário
+> Fases 4 e 5 foram concluídas. Não comece nenhuma outra fase sem o usuário
 > pedir explicitamente.
 
 ---
@@ -151,9 +151,12 @@ src/
 │   ├── PerfilScreen, EditarPerfilScreen, ExcluirContaScreen
 │   ├── HistoricoScreen, EvolucaoScreen             # histórico de partidas + gráficos + insight
 │   ├── JogoScreen.tsx           # tela ÚNICA reutilizável p/ todos os jogos (recebe tipoOperacao)
-│   └── RankingScreen.tsx
+│   ├── RankingScreen.tsx, GamificacaoScreen.tsx
+│   └── OnboardingScreen.tsx, PreferenciasScreen.tsx
 ├── components/
-│   ├── BotaoGrande.tsx, CampoTexto.tsx
+│   ├── BotaoGrande.tsx, CampoTexto.tsx, Mascote.tsx
+├── context/
+│   └── ExperienciaContext.tsx    # onboarding + tema + fonte + leitura em voz alta
 └── theme/
     └── colors.ts
 ```
@@ -576,12 +579,17 @@ avatar/moldura muda na Home e no Perfil imediatamente. O servidor persiste
 avatarId, molduraId, itens comprados e conquistas; o resultado de uma partida
 também devolve as medalhas recém-desbloqueadas para a `JogoScreen`.
 
-### Fases seguintes (NÃO fazer agora, só se o usuário pedir explicitamente)
+### ✅ Fase 5 — Experiência infantil (UX)
 
-**Fase 5 — Experiência infantil (UX):** onboarding/tutorial inicial,
-boas-vindas por jogo, feedback sonoro/visual mais rico, mascote do app,
-leitura em voz alta das perguntas, tamanho de fonte ajustável, modo escuro,
-teste com criança real.
+- ✅ Onboarding inicial, que pode ser visto de novo em Perfil > Meu jeito de jogar
+- ✅ Boas-vindas por jogo e mascote com mensagens de incentivo
+- ✅ Feedback visual e sonoro mais claro a cada resposta
+- ✅ Leitura automática das perguntas e botão para ouvir novamente (expo-speech)
+- ✅ Fonte normal, grande e extra grande, além de modo claro/escuro persistidos
+- 📋 Roteiro de teste com criança real em docs/TESTE_COM_CRIANCA.md (etapa manual,
+  sem coleta de dados pessoais)
+
+### Fases seguintes (NÃO fazer agora, só se o usuário pedir explicitamente)
 
 **Fase 6 — Feedback inteligente:** implementar `AvaliacaoFinalRepository`
 (service + controller, hoje só usado na exclusão de conta), feedback

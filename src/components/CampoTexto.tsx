@@ -7,7 +7,7 @@ import {
   KeyboardTypeOptions,
   TouchableOpacity,
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { useExperiencia } from '../context/ExperienciaContext';
 
 interface CampoTextoProps {
   label: string;
@@ -29,6 +29,7 @@ export default function CampoTexto({
   keyboardType = 'default',
   mostrarBotaoSenha = false,
 }: CampoTextoProps) {
+  const { paleta, escalaFonte } = useExperiencia();
 
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
@@ -37,12 +38,12 @@ export default function CampoTexto({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: paleta.text, fontSize: 16 * escalaFonte }]}>{label}</Text>
       <View style={styles.inputWrapper}>
         <TextInput
-          style={[styles.input, mostrarBotaoSenha && styles.inputComBotao]}
+          style={[styles.input, mostrarBotaoSenha && styles.inputComBotao, { backgroundColor: paleta.card, color: paleta.text, borderColor: paleta.border, fontSize: 16 * escalaFonte }]}
           placeholder={placeholder}
-          placeholderTextColor={colors.textLight}
+          placeholderTextColor={paleta.textLight}
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={ocultarSenha}
@@ -70,7 +71,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
     marginBottom: 8,
   },
   inputWrapper: {
@@ -78,14 +78,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   input: {
-    backgroundColor: colors.white,
     borderRadius: 15,
     paddingHorizontal: 18,
     paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
     borderWidth: 2,
-    borderColor: colors.purpleLight,
   },
   inputComBotao: {
     paddingRight: 54,

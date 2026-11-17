@@ -129,8 +129,9 @@ npx expo start
 ```
 
 O `npm install` já traz todas as dependências do projeto, incluindo
-`@react-native-community/netinfo` (detecção de conexão com a internet) — não
-precisa instalar nada manualmente além disso.
+`@react-native-community/netinfo` (detecção de conexão), `expo-speech`
+(leitura em voz alta) e as dependências web do Expo — não precisa instalar
+nada manualmente além disso.
 
 ### URL do backend
 
@@ -243,23 +244,15 @@ src/
 
 ---
 
-## 7. Próximos passos (Fase 4 — em andamento)
+## 7. Experiência infantil (Fase 5 — concluída)
 
-O roadmap completo (Fases 1 a 12, com o que já está pronto e o que falta)
-está detalhado no `CLAUDE.md`. **Fase 3 (conteúdo dos jogos) concluída** —
-dificuldade fácil/média/difícil com problemas em texto, configuração de
-dificuldade/modo adaptativo/modo sem pressão antes da partida, revisão final
-das perguntas erradas, e 5 jogos novos (sequência, comparação, relógio,
-dinheiro, frações — catálogo foi de 6 pra 11 jogos).
+O roadmap completo (Fases 1 a 12) está detalhado no `CLAUDE.md`.
 
-Resumo da fase atual — **gamificação**:
-
-- Conquistas/medalhas
-- Streak diário
-- Barra de progresso por jogo
-- Níveis/títulos
-- Avatar customizável
-- Loja de recompensas com moedas mágicas
+A Fase 5 inclui onboarding, mascote e mensagens de incentivo, feedback
+reforçado no jogo, leitura das perguntas, fonte ajustável e modo escuro.
+As preferências ficam em **Perfil > Meu jeito de jogar** e são salvas no
+aparelho. O roteiro manual para testar com uma criança, sem coletar dados
+pessoais, está em `docs/TESTE_COM_CRIANCA.md`.
 
 📌 Se um dia o app for publicado de verdade (Play Store/App Store): revisar o
 fluxo de cadastro para incluir um responsável/adulto, por causa da LGPD e das

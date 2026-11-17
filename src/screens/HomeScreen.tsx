@@ -10,6 +10,8 @@ import {
 import { colors } from '../theme/colors';
 import { useUsuario } from '../context/UsuarioContext';
 import { obterAvatar } from '../theme/avatarVisual';
+import Mascote from '../components/Mascote';
+import { useExperiencia } from '../context/ExperienciaContext';
 
 interface Props {
   navigation: any;
@@ -121,6 +123,7 @@ const JOGOS = [
 export default function HomeScreen({ navigation }: Props) {
 
   const { usuario, deslogar } = useUsuario();
+  const { paleta, escalaFonte } = useExperiencia();
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'matemágico(a)';
   const avatar = obterAvatar(usuario?.avatarId, usuario?.molduraId);
 
@@ -130,15 +133,15 @@ export default function HomeScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+    <View style={[styles.container, { backgroundColor: paleta.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={paleta.primary} />
 
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: paleta.primary }]}>
         <View>
           <Text style={styles.saudacao}>
             Olá, {primeiroNome}! 👋
           </Text>
-          <Text style={styles.nome}>Pronto para aprender?</Text>
+          <Text style={[styles.nome, { fontSize: 22 * escalaFonte }]}>Pronto para aprender?</Text>
         </View>
         <TouchableOpacity style={[styles.avatar, { borderColor: avatar.cor }]} onPress={() => navigation.navigate('Perfil')}>
           <Text style={styles.avatarTexto}>{avatar.emoji}</Text>
@@ -158,22 +161,26 @@ export default function HomeScreen({ navigation }: Props) {
       )}
 
       <TouchableOpacity
-        style={styles.cardProgresso}
+        style={[styles.cardProgresso, { backgroundColor: paleta.card }]}
         activeOpacity={0.8}
         onPress={() => navigation.navigate('Gamificacao')}
       >
         <View style={styles.progressoInfo}>
-          <Text style={styles.progressoTitulo}>⭐ Sua jornada</Text>
-          <Text style={styles.progressoSubtitulo}>
+          <Text style={[styles.progressoTitulo, { color: paleta.text, fontSize: 16 * escalaFonte }]}>⭐ Sua jornada</Text>
+          <Text style={[styles.progressoSubtitulo, { color: paleta.textLight, fontSize: 13 * escalaFonte }]}>
             {usuario?.totalPontos ?? 0} pontos • {usuario?.moedasMagicas ?? 0} moedas mágicas
           </Text>
         </View>
-        <Text style={styles.progressoTexto}>
+        <Text style={[styles.progressoTexto, { color: paleta.textLight, fontSize: 13 * escalaFonte }]}>
           🔥 Toque para ver sua jornada e a loja!
         </Text>
       </TouchableOpacity>
 
-      <Text style={styles.secaoTitulo}>🎮 Escolha um jogo</Text>
+      <View style={styles.mascote}>
+        <Mascote mensagem="Escolha uma aventura. Eu acredito em você!" compacto />
+      </View>
+
+      <Text style={[styles.secaoTitulo, { color: paleta.text, fontSize: 20 * escalaFonte }]}>🎮 Escolha um jogo</Text>
 
       <ScrollView
         style={styles.lista}
@@ -183,7 +190,7 @@ export default function HomeScreen({ navigation }: Props) {
         {JOGOS.map((jogo) => (
           <TouchableOpacity
             key={jogo.id}
-            style={[styles.jogoCard, { borderLeftColor: jogo.cor }]}
+            style={[styles.jogoCard, { borderLeftColor: jogo.cor, backgroundColor: paleta.card }]}
             activeOpacity={0.7}
             onPress={() =>
               navigation.navigate('Jogo', {
@@ -200,10 +207,10 @@ export default function HomeScreen({ navigation }: Props) {
               <Text style={styles.jogoIconeTexto}>{jogo.icone}</Text>
             </View>
             <View style={styles.jogoTexto}>
-              <Text style={styles.jogoTitulo}>{jogo.titulo}</Text>
-              <Text style={styles.jogoDescricao}>{jogo.descricao}</Text>
+              <Text style={[styles.jogoTitulo, { color: paleta.text, fontSize: 17 * escalaFonte }]}>{jogo.titulo}</Text>
+              <Text style={[styles.jogoDescricao, { color: paleta.textLight, fontSize: 13 * escalaFonte }]}>{jogo.descricao}</Text>
             </View>
-            <Text style={styles.seta}>›</Text>
+            <Text style={[styles.seta, { color: paleta.textLight }]}>›</Text>
           </TouchableOpacity>
         ))}
 
@@ -324,6 +331,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 14,
   },
+  mascote: { marginHorizontal: 24, marginTop: 14 },
   lista: {
     flex: 1,
   },

@@ -4,22 +4,25 @@ import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
 import { useUsuario } from '../context/UsuarioContext';
 import { obterAvatar } from '../theme/avatarVisual';
+import { useExperiencia } from '../context/ExperienciaContext';
 
 interface Props {
   navigation: any;
 }
 
 function LinhaInfo({ label, valor }: { label: string; valor: string }) {
+  const { paleta, escalaFonte } = useExperiencia();
   return (
     <View style={styles.linhaInfo}>
-      <Text style={styles.linhaInfoLabel}>{label}</Text>
-      <Text style={styles.linhaInfoValor}>{valor}</Text>
+      <Text style={[styles.linhaInfoLabel, { color: paleta.textLight, fontSize: 14 * escalaFonte }]}>{label}</Text>
+      <Text style={[styles.linhaInfoValor, { color: paleta.text, fontSize: 15 * escalaFonte }]}>{valor}</Text>
     </View>
   );
 }
 
 export default function PerfilScreen({ navigation }: Props) {
   const { usuario, deslogar } = useUsuario();
+  const { paleta, escalaFonte } = useExperiencia();
   const avatar = obterAvatar(usuario?.avatarId, usuario?.molduraId);
 
   async function handleSair() {
@@ -32,8 +35,8 @@ export default function PerfilScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: paleta.background }]}>
+      <View style={[styles.header, { backgroundColor: paleta.primary }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.voltarTexto}>← Voltar</Text>
         </TouchableOpacity>
@@ -46,13 +49,13 @@ export default function PerfilScreen({ navigation }: Props) {
           <View style={[styles.avatar, { borderColor: avatar.cor }]}>
             <Text style={styles.avatarTexto}>{avatar.emoji}</Text>
           </View>
-          <Text style={styles.nome}>{usuario.nome}</Text>
+          <Text style={[styles.nome, { color: paleta.text, fontSize: 22 * escalaFonte }]}>{usuario.nome}</Text>
           <TouchableOpacity
             style={styles.linkEditar}
             activeOpacity={0.7}
             onPress={() => navigation.navigate('EditarPerfil')}
           >
-            <Text style={styles.linkEditarTexto}>✏️ Editar perfil</Text>
+          <Text style={[styles.linkEditarTexto, { color: paleta.primary, fontSize: 13 * escalaFonte }]}>✏️ Editar perfil</Text>
           </TouchableOpacity>
         </View>
 
@@ -66,7 +69,7 @@ export default function PerfilScreen({ navigation }: Props) {
           </TouchableOpacity>
         )}
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: paleta.card }]}>
           <LinhaInfo label="📧 Email" valor={usuario.email} />
           <View style={styles.linhaDivisor} />
           <LinhaInfo label="🎂 Idade" valor={`${usuario.idade} anos`} />
@@ -91,35 +94,43 @@ export default function PerfilScreen({ navigation }: Props) {
         </View>
 
         <TouchableOpacity
-          style={styles.linkRanking}
+          style={[styles.linkRanking, { backgroundColor: paleta.card }]}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('Ranking')}
         >
-          <Text style={styles.linkRankingTexto}>🏆 Ver ranking geral</Text>
+          <Text style={[styles.linkRankingTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>🏆 Ver ranking geral</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.linkRanking}
+          style={[styles.linkRanking, { backgroundColor: paleta.card }]}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Preferencias')}
+        >
+          <Text style={[styles.linkRankingTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>⚙️ Meu jeito de jogar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.linkRanking, { backgroundColor: paleta.card }]}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('Historico')}
         >
-          <Text style={styles.linkRankingTexto}>📜 Ver histórico de partidas</Text>
+          <Text style={[styles.linkRankingTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>📜 Ver histórico de partidas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.linkRanking}
+          style={[styles.linkRanking, { backgroundColor: paleta.card }]}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('Evolucao')}
         >
-          <Text style={styles.linkRankingTexto}>📊 Ver minha evolução</Text>
+          <Text style={[styles.linkRankingTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>📊 Ver minha evolução</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.linkRanking}
+          style={[styles.linkRanking, { backgroundColor: paleta.card }]}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('Gamificacao')}
         >
-          <Text style={styles.linkRankingTexto}>✨ Minha jornada, conquistas e loja</Text>
+          <Text style={[styles.linkRankingTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>✨ Minha jornada, conquistas e loja</Text>
         </TouchableOpacity>
 
         <View style={styles.espacoBotaoSair}>

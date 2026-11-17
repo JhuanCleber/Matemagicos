@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { useExperiencia } from '../context/ExperienciaContext';
 
 interface BotaoGrandeProps {
   titulo: string;
@@ -14,10 +14,11 @@ interface BotaoGrandeProps {
 export default function BotaoGrande({
   titulo,
   onPress,
-  cor = colors.primary,
+  cor,
   icone,
   desabilitado = false,
 }: BotaoGrandeProps) {
+  const { paleta, escalaFonte } = useExperiencia();
   return (
     <Pressable
       onPress={onPress}
@@ -25,13 +26,13 @@ export default function BotaoGrande({
       android_ripple={{ color: 'rgba(255,255,255,0.3)' }}
       style={({ pressed }) => [
         styles.botao,
-        { backgroundColor: desabilitado ? colors.textLight : cor },
+        { backgroundColor: desabilitado ? paleta.textLight : (cor ?? paleta.primary) },
         pressed && styles.botaoPressionado,
       ]}
     >
       <View style={styles.conteudo}>
         {icone && <Text style={styles.icone}>{icone}</Text>}
-        <Text style={styles.texto}>{titulo}</Text>
+        <Text style={[styles.texto, { color: paleta.white, fontSize: 20 * escalaFonte }]}>{titulo}</Text>
       </View>
     </Pressable>
   );
@@ -62,7 +63,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   texto: {
-    color: colors.white,
     fontSize: 20,
     fontWeight: 'bold',
     letterSpacing: 0.5,

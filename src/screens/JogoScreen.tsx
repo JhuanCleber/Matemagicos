@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import * as Speech from 'expo-speech';
 import { colors } from '../theme/colors';
 import BotaoGrande from '../components/BotaoGrande';
+import Mascote from '../components/Mascote';
 import { useUsuario } from '../context/UsuarioContext';
+import { useExperiencia } from '../context/ExperienciaContext';
 import { Dificuldade, gerarPerguntas, Pergunta } from '../game/perguntas';
 import { registrarDesempenhoApi, ResultadoDesempenho } from '../services/jogoService';
 import { useApiAutenticada } from '../hooks/useApiAutenticada';
@@ -44,6 +47,7 @@ function ajustarDificuldade(atual: Dificuldade, acertou: boolean): Dificuldade {
 export default function JogoScreen({ navigation, route }: Props) {
   const { idJogo, titulo, tipoOperacao, dificuldade, icone, cor } = route.params as JogoParams;
   const { token, atualizarUsuario } = useUsuario();
+  const { leituraAtiva, paleta, escalaFonte } = useExperiencia();
   const { chamarApiAutenticada } = useApiAutenticada();
 
   const somAcerto = useAudioPlayer(SOM_ACERTO);
@@ -176,6 +180,22 @@ export default function JogoScreen({ navigation, route }: Props) {
 
   const perguntaAtual = perguntas[indiceAtual];
 
+  useEffect(() => {
+    if (!partidaIniciada || !perguntaAtual || !leituraAtiva) return;
+    Speech.stop();
+    Speech.speak(
+      `${perguntaAtual.enunciado}. As opções são: ${perguntaAtual.opcoes.join(', ')}.`,
+      { language: 'pt-BR', rate: 0.85 }
+    );
+    return () => { void Speech.stop(); };
+  }, [indiceAtual, leituraAtiva, partidaIniciada, perguntaAtual]);
+
+  function lerPerguntaAgora() {
+    if (!perguntaAtual) return;
+    Speech.stop();
+    Speech.speak(`${perguntaAtual.enunciado}. As opções são: ${perguntaAtual.opcoes.join(', ')}.`, { language: 'pt-BR', rate: 0.85 });
+  }
+
   function handleResponder(opcao: string) {
     if (jaRespondeu || !perguntaAtual) return;
 
@@ -282,9 +302,10 @@ export default function JogoScreen({ navigation, route }: Props) {
           <Text style={styles.configuracaoIcone}>{icone}</Text>
           <Text style={styles.configuracaoTitulo}>{titulo}</Text>
           <Text style={styles.configuracaoSubtitulo}>Prepare sua aventura matemática!</Text>
+          <Mascote mensagem={`Eu vou ficar com você em ${titulo}! Escolha como quer jogar.`} compacto />
 
-          <View style={styles.configuracaoCard}>
-            <Text style={styles.configuracaoLabel}>Escolha a dificuldade</Text>
+          <View style={[styles.configuracaoCard, { backgroundColor: paleta.card }]}>
+            <Text style={[styles.configuracaoLabel, { color: paleta.text, fontSize: 17 * escalaFonte }]}>Escolha a dificuldade</Text>
             <View style={styles.opcoesConfiguracao}>
               {(Object.keys(LABEL_DIFICULDADE) as Dificuldade[]).map((nivel) => (
                 <TouchableOpacity
@@ -292,7 +313,7 @@ export default function JogoScreen({ navigation, route }: Props) {
                   style={[styles.botaoConfiguracao, dificuldadeSelecionada === nivel && styles.botaoConfiguracaoAtivo]}
                   onPress={() => setDificuldadeSelecionada(nivel)}
                 >
-                  <Text style={[styles.botaoConfiguracaoTexto, dificuldadeSelecionada === nivel && styles.botaoConfiguracaoTextoAtivo]}>
+                  <Text style={[styles.botaoConfiguracaoTexto, { color: paleta.text, fontSize: 13 * escalaFonte }, dificuldadeSelecionada === nivel && styles.botaoConfiguracaoTextoAtivo]}>
                     {LABEL_DIFICULDADE[nivel]}
                   </Text>
                 </TouchableOpacity>
@@ -301,16 +322,16 @@ export default function JogoScreen({ navigation, route }: Props) {
 
             <TouchableOpacity style={styles.linhaModo} onPress={() => setModoAdaptativo((ativo) => !ativo)}>
               <View style={styles.textoModo}>
-                <Text style={styles.tituloModo}>🪄 Dificuldade adaptativa</Text>
-                <Text style={styles.descricaoModo}>Os desafios sobem ou descem conforme seus acertos.</Text>
+                <Text style={[styles.tituloModo, { color: paleta.text, fontSize: 16 * escalaFonte }]}>🪄 Dificuldade adaptativa</Text>
+                <Text style={[styles.descricaoModo, { color: paleta.textLight, fontSize: 13 * escalaFonte }]}>Os desafios sobem ou descem conforme seus acertos.</Text>
               </View>
               <Text style={styles.seletorModo}>{modoAdaptativo ? '✓' : '○'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.linhaModo} onPress={() => setSemPressao((ativo) => !ativo)}>
               <View style={styles.textoModo}>
-                <Text style={styles.tituloModo}>🌈 Modo sem pressão</Text>
-                <Text style={styles.descricaoModo}>Jogue no seu ritmo, sem cronômetro e sem tempo no histórico.</Text>
+                <Text style={[styles.tituloModo, { color: paleta.text, fontSize: 16 * escalaFonte }]}>🌈 Modo sem pressão</Text>
+                <Text style={[styles.descricaoModo, { color: paleta.textLight, fontSize: 13 * escalaFonte }]}>Jogue no seu ritmo, sem cronômetro e sem tempo no histórico.</Text>
               </View>
               <Text style={styles.seletorModo}>{semPressao ? '✓' : '○'}</Text>
             </TouchableOpacity>
@@ -334,6 +355,7 @@ export default function JogoScreen({ navigation, route }: Props) {
           <Text style={styles.resultadoTitulo}>{foiBem ? 'Mandou muito bem!' : 'Quase lá!'}</Text>
           <Text style={styles.resultadoPlacar}>{acertos} de {TOTAL_PERGUNTAS} acertos</Text>
           {errosRef.current.length > 0 && <Text style={styles.revisaoConcluida}>Você também revisou as perguntas que errou. 🌟</Text>}
+          <Mascote humor={foiBem ? 'comemoracao' : 'incentivo'} mensagem={foiBem ? 'Que orgulho! Você está ficando cada vez mais forte.' : 'Você tentou de verdade. Cada tentativa ensina algo novo!'} />
 
           {enviando && <View style={styles.statusBox}><ActivityIndicator color={colors.white} /><Text style={styles.statusTexto}>Salvando seu resultado...</Text></View>}
           {erroEnvio && <View style={styles.statusBox}><Text style={styles.erroTexto}>{erroEnvio}</Text><BotaoGrande titulo="Tentar salvar de novo" icone="🔄" onPress={enviarResultado} cor={colors.danger} /></View>}
@@ -367,17 +389,28 @@ export default function JogoScreen({ navigation, route }: Props) {
         {emRevisao ? 'Esta revisão não altera sua pontuação.' : modoAdaptativo ? `Dificuldade: ${LABEL_DIFICULDADE[dificuldadeAtual]} (adaptativa)` : `Dificuldade: ${LABEL_DIFICULDADE[dificuldadeSelecionada]}`}
         {!semPressao && ` · ⏱ ${segundosDecorridos}s`}
       </Text>
+      <Mascote compacto mensagem={emRevisao ? 'Revisar é uma superforça!' : 'Leia com calma. Você consegue!'} humor="incentivo" />
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Animated.View style={[styles.card, { opacity: opacidadeCard, transform: [{ translateX: deslocamentoErro }] }]}>
-          <Text style={styles.enunciado}>{perguntaAtual?.enunciado}</Text>
+        <Animated.View style={[styles.card, { backgroundColor: paleta.card, opacity: opacidadeCard, transform: [{ translateX: deslocamentoErro }] }]}>
+          <View style={styles.linhaPergunta}>
+            <Text style={[styles.enunciado, { color: paleta.text, fontSize: 28 * escalaFonte }]}>{perguntaAtual?.enunciado}</Text>
+            <TouchableOpacity accessibilityLabel="Ouvir pergunta" onPress={lerPerguntaAgora} style={[styles.botaoOuvir, { backgroundColor: paleta.purpleLight }]}><Text style={{ fontSize: 23 }}>🔊</Text></TouchableOpacity>
+          </View>
           <View style={styles.opcoesContainer}>
             {perguntaAtual?.opcoes.map((opcao) => (
               <TouchableOpacity key={opcao} style={[styles.opcaoBotao, estiloDaOpcao(opcao)]} onPress={() => handleResponder(opcao)} disabled={jaRespondeu} activeOpacity={0.7}>
-                <Text style={styles.opcaoTexto}>{opcao}</Text>
+                <Text style={[styles.opcaoTexto, { color: paleta.text, fontSize: 20 * escalaFonte }]}>{opcao}</Text>
               </TouchableOpacity>
             ))}
           </View>
+          {jaRespondeu && (
+            <View style={[styles.feedbackResposta, { backgroundColor: opcaoSelecionada === perguntaAtual?.respostaCorreta ? paleta.greenLight : paleta.orangeLight }]}>
+              <Text style={[styles.feedbackRespostaTexto, { color: paleta.text, fontSize: 15 * escalaFonte }]}>
+                {opcaoSelecionada === perguntaAtual?.respostaCorreta ? '🌟 Acertou! Muito bem, continue assim!' : '💡 Boa tentativa! Observe a resposta certa e siga em frente.'}
+              </Text>
+            </View>
+          )}
           {jaRespondeu && <BotaoGrande titulo={tituloBotaoProxima} icone="➡️" onPress={handleProxima} cor={colors.primary} />}
         </Animated.View>
       </ScrollView>
@@ -411,7 +444,11 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, paddingBottom: 30 },
   card: { backgroundColor: colors.background, borderRadius: 24, padding: 22 },
   enunciado: { fontSize: 28, fontWeight: 'bold', color: colors.text, textAlign: 'center', marginBottom: 22, lineHeight: 38 },
+  linhaPergunta: { flexDirection: 'row', alignItems: 'flex-start' },
+  botaoOuvir: { width: 46, height: 46, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
   opcoesContainer: { marginBottom: 8 },
+  feedbackResposta: { borderRadius: 14, padding: 12, marginBottom: 8 },
+  feedbackRespostaTexto: { fontWeight: '700', textAlign: 'center', lineHeight: 20 },
   opcaoBotao: { borderRadius: 16, paddingVertical: 16, marginBottom: 12, borderWidth: 2, alignItems: 'center' },
   opcaoNeutra: { backgroundColor: colors.white, borderColor: colors.purpleLight },
   opcaoCorreta: { backgroundColor: colors.success, borderColor: colors.success },
